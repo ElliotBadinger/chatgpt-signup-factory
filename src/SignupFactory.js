@@ -1,9 +1,9 @@
-import { ensureBrowserLaunched } from './chrome-devtools-mcp/build/src/browser.js';
-import { tools } from './chrome-devtools-mcp/build/src/tools/tools.js';
-import { McpContext } from './chrome-devtools-mcp/build/src/McpContext.js';
-import { McpResponse } from './chrome-devtools-mcp/build/src/McpResponse.js';
-import { logger } from './chrome-devtools-mcp/build/src/logger.js';
-import { loadIssueDescriptions } from './chrome-devtools-mcp/build/src/issue-descriptions.js';
+import { ensureBrowserLaunched } from '../chrome-devtools-mcp/build/src/browser.js';
+import { tools } from '../chrome-devtools-mcp/build/src/tools/tools.js';
+import { McpContext } from '../chrome-devtools-mcp/build/src/McpContext.js';
+import { McpResponse } from '../chrome-devtools-mcp/build/src/McpResponse.js';
+import { logger } from '../chrome-devtools-mcp/build/src/logger.js';
+import { loadIssueDescriptions } from '../chrome-devtools-mcp/build/src/issue-descriptions.js';
 import { AgentMailProvider } from './AgentMailProvider.js';
 import { ChatGPTStateManager } from './ChatGPTStateManager.js';
 import path from 'node:path';
