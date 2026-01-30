@@ -1,6 +1,10 @@
 import { AgentMailProvider } from '../src/AgentMailProvider.js';
 
-const API_KEY = 'REDACTED';
+const API_KEY = process.env.AGENTMAIL_API_KEY;
+
+if (!API_KEY) {
+    throw new Error('AGENTMAIL_API_KEY environment variable is required for tests');
+}
 
 describe('AgentMailProvider', () => {
   let provider;
