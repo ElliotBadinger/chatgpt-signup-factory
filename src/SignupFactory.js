@@ -91,7 +91,7 @@ export class SignupFactory {
         if (state === 'CHAT_INTERFACE') {
             console.log('Detected existing session. Proceeding to verification.');
         } else {
-            console.log('No existing session. Starting signup flow.');
+            console.log('No existing session or blocked. Starting signup flow.');
             const inbox = await this.emailProvider.createInbox();
             this.email = inbox.inbox_id;
             console.log('Target Email:', this.email);
@@ -122,13 +122,15 @@ export class SignupFactory {
                 stateCounter = 1;
             }
 
-            // Delta strategy: if stuck for 2 snapshots, try something else
+            // Delta strategy: if stuck for 3 snapshots, try something else
+            // Mandate: "stays in the same state for more than 3 consecutive snapshots without a successful action"
+            // We'll try to act in every step. If stateCounter reaches 4, it means 3 actions failed to change state.
             if (stateCounter === 2) {
                 console.log(`[Step ${attempts}] STUCK in ${state} for 2 steps. Trying Delta: Escape`);
                 await this.callTool('press_key', { key: 'Escape' });
             } else if (stateCounter === 3) {
-                console.log(`[Step ${attempts}] STUCK in ${state} for 3 steps. Trying Delta: Refresh`);
-                await this.callTool('evaluate_script', { function: '() => { location.reload(); }' });
+                console.log(`[Step ${attempts}] STUCK in ${state} for 3 steps. Trying Delta: Refresh (F5)`);
+                await this.callTool('press_key', { key: 'F5' });
             } else if (stateCounter > 3) {
                 const dump = {
                     state,
@@ -143,7 +145,12 @@ export class SignupFactory {
             } else {
                 // Normal handling
                 try {
-                    await this.handleState(state, snapshot);
+                    const acted = await this.handleState(state, snapshot);
+                    if (acted) {
+                        // We reset or decrement counter if we think we did something? 
+                        // Actually, if we acted and state remains same, we are still potentially stuck.
+                        // But some states like ONBOARDING have multiple screens.
+                    }
                 } catch (e) {
                     console.error('Error handling state:', e.message);
                 }
@@ -162,10 +169,14 @@ export class SignupFactory {
     }
 
     async handleState(state, snapshot) {
+        let acted = false;
         switch (state) {
             case 'LANDING':
                 const signupBtn = snapshot.match(/uid=(\d+_\d+) button "Sign up for free"/i);
-                if (signupBtn) await this.callTool('click', { uid: signupBtn[1] });
+                if (signupBtn) {
+                    await this.callTool('click', { uid: signupBtn[1] });
+                    acted = true;
+                }
                 break;
             case 'LOGIN_EMAIL':
                 const emailInput = snapshot.match(/uid=(\d+_\d+) textbox "Email address"/i);
@@ -174,6 +185,7 @@ export class SignupFactory {
                     const continueBtn = snapshot.match(/uid=(\d+_\d+) button "Continue"/i);
                     if (continueBtn) await this.callTool('click', { uid: continueBtn[1] });
                     else await this.callTool('press_key', { key: 'Enter' });
+                    acted = true;
                 }
                 break;
             case 'LOGIN_PASSWORD':
@@ -183,6 +195,7 @@ export class SignupFactory {
                     const continueBtn = snapshot.match(/uid=(\d+_\d+) button "Continue"/i);
                     if (continueBtn) await this.callTool('click', { uid: continueBtn[1] });
                     else await this.callTool('press_key', { key: 'Enter' });
+                    acted = true;
                 }
                 break;
             case 'OTP_VERIFICATION':
@@ -192,43 +205,56 @@ export class SignupFactory {
                     if (codeInput) {
                         await this.fillField(codeInput[1], code);
                         await this.callTool('press_key', { key: 'Enter' });
+                        acted = true;
                     }
                 }
                 break;
             case 'ABOUT_YOU':
                 console.log('Handling ABOUT_YOU...');
                 const nameInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Full name"/i);
-                const dayInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"day/i);
-                const monthInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"month/i);
-                const yearInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"year/i);
-                const birthdayInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Birthday"/i);
+                const birthdayFields = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"month/i);
                 
                 if (nameInp) {
                     await this.fillField(nameInp[1], 'Agent User');
+                    acted = true;
                 }
+                
+                const monthInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"month/i);
+                const dayInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"day/i);
+                const yearInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"year/i);
+                const birthdayInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Birthday"/i);
+
                 if (birthdayInp) {
                     await this.fillField(birthdayInp[1], '01/01/1990');
-                } else {
+                    acted = true;
+                } else if (monthInp || dayInp || yearInp) {
                     if (monthInp) await this.fillField(monthInp[1], '1');
                     if (dayInp) await this.fillField(dayInp[1], '1');
                     if (yearInp) await this.fillField(yearInp[1], '1990');
+                    acted = true;
                 }
 
-                await new Promise(r => setTimeout(r, 2000));
-                const contBtn = snapshot.match(/uid=(\d+_\d+) button "(?:Continue|Submit|Done)"/i);
-                if (contBtn) {
-                    await this.callTool('click', { uid: contBtn[1] });
-                } else {
-                    await this.callTool('press_key', { key: 'Enter' });
+                if (acted) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    const contBtn = snapshot.match(/uid=(\d+_\d+) button "(?:Continue|Submit|Done)"/i);
+                    if (contBtn) {
+                        await this.callTool('click', { uid: contBtn[1] });
+                    } else {
+                        await this.callTool('press_key', { key: 'Enter' });
+                    }
                 }
                 break;
             case 'ONBOARDING':
                 const skipBtn = snapshot.match(/uid=(\d+_\d+) button "Skip"/i);
                 if (skipBtn) {
                     await this.callTool('click', { uid: skipBtn[1] });
+                    acted = true;
                 } else {
                     const nextBtn = snapshot.match(/uid=(\d+_\d+) button "(?:Next|Continue|Okay, let’s go|Yes|Stay logged in|Done)"/i);
-                    if (nextBtn) await this.callTool('click', { uid: nextBtn[1] });
+                    if (nextBtn) {
+                        await this.callTool('click', { uid: nextBtn[1] });
+                        acted = true;
+                    }
                 }
                 break;
             case 'BLOCKED':
@@ -236,11 +262,13 @@ export class SignupFactory {
                 const check = snapshot.match(/uid=(\d+_\d+) checkbox/i) || snapshot.match(/uid=(\d+_\d+) button "Verify you are human"/i);
                 if (check) {
                     await this.callTool('click', { uid: check[1] });
+                    acted = true;
                 }
                 break;
             case 'ACCESS_DENIED':
                 throw new Error('ACCESS_DENIED_IP_BLOCKED');
         }
+        return acted;
     }
 
     async verifyAccount(snapshot) {
