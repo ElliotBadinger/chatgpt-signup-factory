@@ -223,8 +223,13 @@ export class SignupFactory {
                 }
                 break;
             case 'ONBOARDING':
-                const skip = snapshot.match(/uid=(\d+_\d+) button "(?:Skip|Next|Continue|Okay, let’s go|Yes|Stay logged in)"/i);
-                if (skip) await this.callTool('click', { uid: skip[1] });
+                const skipBtn = snapshot.match(/uid=(\d+_\d+) button "Skip"/i);
+                if (skipBtn) {
+                    await this.callTool('click', { uid: skipBtn[1] });
+                } else {
+                    const nextBtn = snapshot.match(/uid=(\d+_\d+) button "(?:Next|Continue|Okay, let’s go|Yes|Stay logged in|Done)"/i);
+                    if (nextBtn) await this.callTool('click', { uid: nextBtn[1] });
+                }
                 break;
             case 'BLOCKED':
                 console.log('Handling BLOCKED/Turnstile...');
