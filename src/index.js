@@ -13,12 +13,12 @@ async function main() {
         await factory.init();
         await factory.run();
         console.log('SUCCESS: ChatGPT account provisioned and ready.');
+        process.exit(0);
     } catch (err) {
         console.error('FATAL ERROR:', err);
         process.exit(1);
     } finally {
-        // Keep browser open if needed for inspection or cleanup
-        // await factory.cleanup(); 
+        await factory.cleanup(); 
     }
 }
 
