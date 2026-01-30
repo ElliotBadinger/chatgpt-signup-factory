@@ -24,6 +24,9 @@ export class ChatGPTStateManager {
     if (snapshot.includes('Just a moment...') || snapshot.includes('Verify you are human')) {
       return 'BLOCKED';
     }
+    if (snapshot.includes('Access denied') || snapshot.includes('Reference #')) {
+      return 'ACCESS_DENIED';
+    }
     return 'UNKNOWN';
   }
 }

@@ -39,8 +39,6 @@ export class SignupFactory {
         this.context = null;
         this.email = null;
         this.password = 'AutomationTest123!';
-        this.lastHandledState = null;
-        this.stateAttempts = 0;
     }
 
     async init() {
@@ -83,13 +81,28 @@ export class SignupFactory {
 
     async run() {
         console.log('--- SIGNUP FACTORY START ---');
-        const inbox = await this.emailProvider.createInbox();
-        this.email = inbox.inbox_id;
-        console.log('Target Email:', this.email);
-
-        await this.callTool('navigate_page', { url: 'https://chatgpt.com/auth/login' });
+        
+        await this.callTool('navigate_page', { url: 'https://chatgpt.com/' });
+        await new Promise(r => setTimeout(r, 5000));
+        
+        let snapshot = await this.getSnapshot();
+        let state = this.stateManager.detectState(snapshot);
+        
+        if (state === 'CHAT_INTERFACE') {
+            console.log('Detected existing session. Proceeding to verification.');
+        } else {
+            console.log('No existing session. Starting signup flow.');
+            const inbox = await this.emailProvider.createInbox();
+            this.email = inbox.inbox_id;
+            console.log('Target Email:', this.email);
+            await this.callTool('navigate_page', { url: 'https://chatgpt.com/auth/login' });
+        }
         
         let attempts = 0;
+        let lastState = null;
+        let stateCounter = 0;
+        let lastFullSnapshot = "";
+
         while (attempts < 50) {
             attempts++;
             const snapshot = await this.getSnapshot();
@@ -99,29 +112,45 @@ export class SignupFactory {
 
             if (state === 'CHAT_INTERFACE') {
                 console.log('!!! SUCCESS: Reach ChatGPT !!!');
-                // Verification: talk to it
                 await this.verifyAccount(snapshot);
                 return true;
             }
 
-            if (state === this.lastHandledState) {
-                this.stateAttempts++;
+            if (state === lastState && state !== 'UNKNOWN') {
+                stateCounter++;
             } else {
-                this.lastHandledState = state;
-                this.stateAttempts = 0;
+                lastState = state;
+                stateCounter = 1;
             }
 
-            // Only retry logic if we've been stuck in a state for a while
-            if (this.stateAttempts % 3 === 0) {
+            // Delta strategy: if stuck for 2 snapshots, try something else
+            if (stateCounter === 2) {
+                console.log(`[Step ${attempts}] STUCK in ${state} for 2 steps. Trying Delta: Escape`);
+                await this.callTool('press_key', { key: 'Escape' });
+            } else if (stateCounter === 3) {
+                console.log(`[Step ${attempts}] STUCK in ${state} for 3 steps. Trying Delta: Refresh`);
+                await this.callTool('evaluate_script', { expression: 'location.reload()' });
+            } else if (stateCounter > 3) {
+                const dump = {
+                    state,
+                    attempts,
+                    snapshot: snapshot
+                };
+                fs.writeFileSync('STUCK_STATE_DUMP.json', JSON.stringify(dump, null, 2));
+                console.error('STUCK_STATE detected. Dumping accessibility tree and terminating.');
+                throw new Error(`STUCK_STATE: ${state} for ${stateCounter} steps`);
+            } else {
+                // Normal handling
                 try {
                     await this.handleState(state, snapshot);
                 } catch (e) {
                     console.error('Error handling state:', e.message);
                 }
             }
+
             await new Promise(r => setTimeout(r, 5000));
         }
-        throw new Error('Automation timed out or stuck');
+        throw new Error('Automation timed out');
     }
 
     async handleState(state, snapshot) {
@@ -151,7 +180,7 @@ export class SignupFactory {
                 }
                 break;
             case 'OTP_VERIFICATION':
-                const code = await this.emailProvider.waitForCode(this.email, 10000);
+                const code = await this.emailProvider.waitForCode(this.email, 60000);
                 if (code) {
                     const codeInput = snapshot.match(/uid=(\d+_\d+) textbox "Code"/);
                     if (codeInput) {
@@ -163,36 +192,44 @@ export class SignupFactory {
                 break;
             case 'ABOUT_YOU':
                 console.log('Handling ABOUT_YOU...');
-                const nameInp = snapshot.match(/uid=(\d+_\d+) textbox "Full name"/);
-                const dayInp = snapshot.match(/uid=(\d+_\d+) spinbutton "day/);
-                const monthInp = snapshot.match(/uid=(\d+_\d+) spinbutton "month/);
-                const yearInp = snapshot.match(/uid=(\d+_\d+) spinbutton "year/);
+                const nameInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Full name"/i);
+                const dayInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox) "day/i);
+                const monthInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox) "month/i);
+                const yearInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox) "year/i);
+                const birthdayInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Birthday"/i);
                 
                 if (nameInp) {
-                    await this.callTool('click', { uid: nameInp[1] });
-                    await this.callTool('fill', { uid: nameInp[1], value: 'Agent' });
+                    await this.callTool('fill', { uid: nameInp[1], value: 'Agent User' });
                 }
-                if (dayInp) {
-                    await this.callTool('click', { uid: dayInp[1] });
-                    await this.callTool('fill', { uid: dayInp[1], value: '01' });
-                }
-                if (monthInp) {
-                    await this.callTool('click', { uid: monthInp[1] });
-                    await this.callTool('fill', { uid: monthInp[1], value: '01' });
-                }
-                if (yearInp) {
-                    await this.callTool('click', { uid: yearInp[1] });
-                    await this.callTool('fill', { uid: yearInp[1], value: '1990' });
+                if (birthdayInp) {
+                    await this.callTool('fill', { uid: birthdayInp[1], value: '01/01/1990' });
+                } else {
+                    if (dayInp) await this.callTool('fill', { uid: dayInp[1], value: '01' });
+                    if (monthInp) await this.callTool('fill', { uid: monthInp[1], value: '01' });
+                    if (yearInp) await this.callTool('fill', { uid: yearInp[1], value: '1990' });
                 }
 
                 await new Promise(r => setTimeout(r, 2000));
-                const contBtn = snapshot.match(/uid=(\d+_\d+) button "Continue"/);
-                if (contBtn) await this.callTool('click', { uid: contBtn[1] });
+                const contBtn = snapshot.match(/uid=(\d+_\d+) button "Continue"/i);
+                if (contBtn) {
+                    await this.callTool('click', { uid: contBtn[1] });
+                } else {
+                    await this.callTool('press_key', { key: 'Enter' });
+                }
                 break;
             case 'ONBOARDING':
-                const skip = snapshot.match(/uid=(\d+_\d+) button "(?:Skip|Next|Continue|Okay, let’s go)"/);
+                const skip = snapshot.match(/uid=(\d+_\d+) button "(?:Skip|Next|Continue|Okay, let’s go)"/i);
                 if (skip) await this.callTool('click', { uid: skip[1] });
                 break;
+            case 'BLOCKED':
+                console.log('Handling BLOCKED/Turnstile...');
+                const check = snapshot.match(/uid=(\d+_\d+) checkbox/i) || snapshot.match(/uid=(\d+_\d+) button "Verify you are human"/i);
+                if (check) {
+                    await this.callTool('click', { uid: check[1] });
+                }
+                break;
+            case 'ACCESS_DENIED':
+                throw new Error('ACCESS_DENIED_IP_BLOCKED');
         }
     }
 
@@ -210,6 +247,11 @@ export class SignupFactory {
             const result = await this.getSnapshot();
             console.log('--- CHATGPT VERIFICATION RESPONSE ---');
             console.log(result);
+            if (result.includes('SUCCESS_AGENT_VERIFIED')) {
+                console.log('--- VERIFICATION SUCCESS ---');
+            } else {
+                console.warn('--- VERIFICATION FAILED: Handshake not found in response ---');
+            }
         }
     }
 
