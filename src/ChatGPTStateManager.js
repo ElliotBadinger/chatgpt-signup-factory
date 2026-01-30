@@ -1,5 +1,8 @@
 export class ChatGPTStateManager {
   detectState(snapshot) {
+    if (snapshot.includes('StaticText "Ask anything"') || snapshot.includes('What’s on your mind today') || snapshot.includes('What are you working on?') || (snapshot.includes('paragraph') && (snapshot.includes('prompt') || snapshot.includes('message')))) {
+      return 'CHAT_INTERFACE';
+    }
     if (snapshot.includes("Let's confirm your age") || snapshot.includes('textbox "Full name"')) {
       return 'ABOUT_YOU';
     }
@@ -17,9 +20,6 @@ export class ChatGPTStateManager {
     }
     if (snapshot.includes("You're all set") || snapshot.includes('You’re all set') || snapshot.includes('What do you want to do with ChatGPT') || snapshot.includes('button "Skip"') || snapshot.includes('button "Next"') || snapshot.includes('Okay, let’s go') || snapshot.includes('Stay logged in') || (snapshot.includes('button "Continue"') && !snapshot.includes('textbox'))) {
       return 'ONBOARDING';
-    }
-    if (snapshot.includes('StaticText "Ask anything"') || snapshot.includes('What’s on your mind today') || (snapshot.includes('paragraph') && (snapshot.includes('prompt') || snapshot.includes('message')))) {
-      return 'CHAT_INTERFACE';
     }
     if (snapshot.includes('Just a moment...') || snapshot.includes('Verify you are human')) {
       return 'BLOCKED';
