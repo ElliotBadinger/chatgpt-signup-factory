@@ -129,15 +129,17 @@ export class SignupFactory {
                 await this.callTool('press_key', { key: 'Escape' });
             } else if (stateCounter === 3) {
                 console.log(`[Step ${attempts}] STUCK in ${state} for 3 steps. Trying Delta: Refresh`);
-                await this.callTool('evaluate_script', { expression: 'location.reload()' });
+                await this.callTool('evaluate_script', { function: '() => { location.reload(); }' });
             } else if (stateCounter > 3) {
                 const dump = {
                     state,
                     attempts,
                     snapshot: snapshot
                 };
-                fs.writeFileSync('STUCK_STATE_DUMP.json', JSON.stringify(dump, null, 2));
-                console.error('STUCK_STATE detected. Dumping accessibility tree and terminating.');
+                const dumpStr = JSON.stringify(dump, null, 2);
+                fs.writeFileSync('STUCK_STATE_DUMP.json', dumpStr);
+                console.error('STUCK_STATE detected. Dumping accessibility tree:');
+                console.error(dumpStr);
                 throw new Error(`STUCK_STATE: ${state} for ${stateCounter} steps`);
             } else {
                 // Normal handling
@@ -200,6 +202,7 @@ export class SignupFactory {
                 
                 if (nameInp) {
                     await this.callTool('fill', { uid: nameInp[1], value: 'Agent User' });
+                    await new Promise(r => setTimeout(r, 500));
                 }
                 if (birthdayInp) {
                     await this.callTool('fill', { uid: birthdayInp[1], value: '01/01/1990' });
@@ -210,7 +213,7 @@ export class SignupFactory {
                 }
 
                 await new Promise(r => setTimeout(r, 2000));
-                const contBtn = snapshot.match(/uid=(\d+_\d+) button "Continue"/i);
+                const contBtn = snapshot.match(/uid=(\d+_\d+) button "(?:Continue|Submit|Done)"/i);
                 if (contBtn) {
                     await this.callTool('click', { uid: contBtn[1] });
                 } else {
