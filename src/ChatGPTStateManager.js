@@ -15,7 +15,7 @@ export class ChatGPTStateManager {
     if (snapshot.includes('button "Sign up for free"') || snapshot.includes('button "Log in"')) {
       return 'LANDING';
     }
-    if (snapshot.includes('You’re all set') || snapshot.includes('button "Skip"') || snapshot.includes('button "Next"') || snapshot.includes('Okay, let’s go') || (snapshot.includes('button "Continue"') && !snapshot.includes('textbox'))) {
+    if (snapshot.includes("You're all set") || snapshot.includes('You’re all set') || snapshot.includes('button "Skip"') || snapshot.includes('button "Next"') || snapshot.includes('Okay, let’s go') || (snapshot.includes('button "Continue"') && !snapshot.includes('textbox'))) {
       return 'ONBOARDING';
     }
     if (snapshot.includes('StaticText "Ask anything"') || snapshot.includes('What’s on your mind today') || (snapshot.includes('paragraph') && (snapshot.includes('prompt') || snapshot.includes('message')))) {
