@@ -11,12 +11,22 @@ import os from 'node:os';
 import fs from 'node:fs';
 
 // Polyfills for browser environment
-global.navigator = { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' };
-global.window = { 
-    location: { pathname: '/' },
-    atob: (s) => Buffer.from(s, 'base64').toString('binary'),
-    btoa: (s) => Buffer.from(s, 'binary').toString('base64')
-};
+Object.defineProperty(global, 'navigator', {
+    value: { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' },
+    configurable: true,
+    enumerable: true,
+    writable: true
+});
+Object.defineProperty(global, 'window', {
+    value: { 
+        location: { pathname: '/' },
+        atob: (s) => Buffer.from(s, 'base64').toString('binary'),
+        btoa: (s) => Buffer.from(s, 'binary').toString('base64')
+    },
+    configurable: true,
+    enumerable: true,
+    writable: true
+});
 global.self = global;
 
 const PROFILE_DIR = path.join(os.homedir(), '.cache', 'chatgpt-factory-profile');
