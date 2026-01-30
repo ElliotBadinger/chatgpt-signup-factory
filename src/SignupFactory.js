@@ -101,7 +101,6 @@ export class SignupFactory {
         let attempts = 0;
         let lastState = null;
         let stateCounter = 0;
-        let lastFullSnapshot = "";
 
         while (attempts < 50) {
             attempts++;
@@ -155,28 +154,33 @@ export class SignupFactory {
         throw new Error('Automation timed out');
     }
 
+    async fillField(uid, value) {
+        await this.callTool('click', { uid });
+        await new Promise(r => setTimeout(r, 200));
+        await this.callTool('fill', { uid, value });
+        await new Promise(r => setTimeout(r, 200));
+    }
+
     async handleState(state, snapshot) {
         switch (state) {
             case 'LANDING':
-                const signupBtn = snapshot.match(/uid=(\d+_\d+) button "Sign up for free"/);
+                const signupBtn = snapshot.match(/uid=(\d+_\d+) button "Sign up for free"/i);
                 if (signupBtn) await this.callTool('click', { uid: signupBtn[1] });
                 break;
             case 'LOGIN_EMAIL':
-                const emailInput = snapshot.match(/uid=(\d+_\d+) textbox "Email address"/);
+                const emailInput = snapshot.match(/uid=(\d+_\d+) textbox "Email address"/i);
                 if (emailInput) {
-                    await this.callTool('fill', { uid: emailInput[1], value: this.email });
-                    await new Promise(r => setTimeout(r, 1000));
-                    const continueBtn = snapshot.match(/uid=(\d+_\d+) button "Continue"/);
+                    await this.fillField(emailInput[1], this.email);
+                    const continueBtn = snapshot.match(/uid=(\d+_\d+) button "Continue"/i);
                     if (continueBtn) await this.callTool('click', { uid: continueBtn[1] });
                     else await this.callTool('press_key', { key: 'Enter' });
                 }
                 break;
             case 'LOGIN_PASSWORD':
-                const passInput = snapshot.match(/uid=(\d+_\d+) textbox "Password"/);
+                const passInput = snapshot.match(/uid=(\d+_\d+) textbox "Password"/i);
                 if (passInput) {
-                    await this.callTool('fill', { uid: passInput[1], value: this.password });
-                    await new Promise(r => setTimeout(r, 1000));
-                    const continueBtn = snapshot.match(/uid=(\d+_\d+) button "Continue"/);
+                    await this.fillField(passInput[1], this.password);
+                    const continueBtn = snapshot.match(/uid=(\d+_\d+) button "Continue"/i);
                     if (continueBtn) await this.callTool('click', { uid: continueBtn[1] });
                     else await this.callTool('press_key', { key: 'Enter' });
                 }
@@ -184,10 +188,9 @@ export class SignupFactory {
             case 'OTP_VERIFICATION':
                 const code = await this.emailProvider.waitForCode(this.email, 60000);
                 if (code) {
-                    const codeInput = snapshot.match(/uid=(\d+_\d+) textbox "Code"/);
+                    const codeInput = snapshot.match(/uid=(\d+_\d+) textbox "Code"/i);
                     if (codeInput) {
-                        await this.callTool('click', { uid: codeInput[1] });
-                        await this.callTool('fill', { uid: codeInput[1], value: code });
+                        await this.fillField(codeInput[1], code);
                         await this.callTool('press_key', { key: 'Enter' });
                     }
                 }
@@ -195,21 +198,20 @@ export class SignupFactory {
             case 'ABOUT_YOU':
                 console.log('Handling ABOUT_YOU...');
                 const nameInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Full name"/i);
-                const dayInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox) "day/i);
-                const monthInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox) "month/i);
-                const yearInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox) "year/i);
+                const dayInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"day/i);
+                const monthInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"month/i);
+                const yearInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"year/i);
                 const birthdayInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Birthday"/i);
                 
                 if (nameInp) {
-                    await this.callTool('fill', { uid: nameInp[1], value: 'Agent User' });
-                    await new Promise(r => setTimeout(r, 500));
+                    await this.fillField(nameInp[1], 'Agent User');
                 }
                 if (birthdayInp) {
-                    await this.callTool('fill', { uid: birthdayInp[1], value: '01/01/1990' });
+                    await this.fillField(birthdayInp[1], '01/01/1990');
                 } else {
-                    if (dayInp) await this.callTool('fill', { uid: dayInp[1], value: '01' });
-                    if (monthInp) await this.callTool('fill', { uid: monthInp[1], value: '01' });
-                    if (yearInp) await this.callTool('fill', { uid: yearInp[1], value: '1990' });
+                    if (monthInp) await this.fillField(monthInp[1], '1');
+                    if (dayInp) await this.fillField(dayInp[1], '1');
+                    if (yearInp) await this.fillField(yearInp[1], '1990');
                 }
 
                 await new Promise(r => setTimeout(r, 2000));
@@ -221,7 +223,7 @@ export class SignupFactory {
                 }
                 break;
             case 'ONBOARDING':
-                const skip = snapshot.match(/uid=(\d+_\d+) button "(?:Skip|Next|Continue|Okay, let’s go)"/i);
+                const skip = snapshot.match(/uid=(\d+_\d+) button "(?:Skip|Next|Continue|Okay, let’s go|Yes|Stay logged in)"/i);
                 if (skip) await this.callTool('click', { uid: skip[1] });
                 break;
             case 'BLOCKED':
