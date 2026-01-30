@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-          cd chrome-devtools-mcp && npm install --omit=dev --ignore-scripts
+          cd chrome-devtools-mcp && npm install --ignore-scripts
           
       - name: Install Google Chrome
         run: |
