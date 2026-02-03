@@ -6,6 +6,7 @@ import { logger } from '../chrome-devtools-mcp/build/src/logger.js';
 import { loadIssueDescriptions } from '../chrome-devtools-mcp/build/src/issue-descriptions.js';
 import { AgentMailProvider } from './AgentMailProvider.js';
 import { ChatGPTStateManager } from './ChatGPTStateManager.js';
+import { getRunConfig } from './RunConfig.js';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
@@ -32,22 +33,26 @@ global.self = global;
 const PROFILE_DIR = path.join(os.homedir(), '.cache', 'chatgpt-factory-profile');
 
 export class SignupFactory {
-    constructor(agentMailApiKey) {
+    constructor(agentMailApiKey, options = {}) {
         this.emailProvider = new AgentMailProvider(agentMailApiKey);
         this.stateManager = new ChatGPTStateManager();
         this.browser = null;
         this.context = null;
-        this.email = null;
-        this.password = 'AutomationTest123!';
+        this.email = options.email || null;
+        this.agentMailInbox = options.agentMailInbox || null;
+        this.password = options.password || 'AutomationTest123!';
+        this.userDataDir = options.userDataDir || PROFILE_DIR;
+        this.headless = options.headless ?? false;
+        this.runConfig = options.runConfig || getRunConfig();
     }
 
     async init() {
         await loadIssueDescriptions();
         this.browser = await ensureBrowserLaunched({
-            headless: false,
+            headless: this.headless,
             channel: 'stable',
-            userDataDir: PROFILE_DIR,
-            chromeArgs: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled'],
+            userDataDir: this.userDataDir,
+            chromeArgs: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled', '--window-size=1280,1024'],
         });
         this.context = await McpContext.from(this.browser, logger, {});
     }
@@ -65,7 +70,8 @@ export class SignupFactory {
         }
         // Sync context
         const pages = await this.browser.pages();
-        const targetPage = pages.find(p => p.url() !== 'about:blank') || pages[pages.length-1];
+        const bestUrl = selectBestPageFromUrls(pages.map(page => page.url()));
+        const targetPage = bestUrl ? [...pages].reverse().find(page => page.url() === bestUrl) : pages[pages.length - 1];
         if (targetPage) await this.context.selectPage(targetPage);
         const res = await response.handle(name, this.context);
         if (!res || !res.content) return [{ type: 'text', text: '' }];
@@ -74,39 +80,57 @@ export class SignupFactory {
     }
 
     async getSnapshot() {
-        const resp = await this.callTool('take_snapshot', { verbose: true });
-        if (!resp || resp.length === 0) return "";
-        return resp[0].text || "";
+        let lastText = '';
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const resp = await this.callTool('take_snapshot', { verbose: true });
+            const text = (resp && resp[0] && resp[0].text) || '';
+            lastText = text;
+            if (text.length > 200) return text;
+            if (attempt < 2) {
+                await new Promise(r => setTimeout(r, this.runConfig.SNAPSHOT_RETRY_MS));
+            }
+        }
+        return lastText;
     }
 
     async run() {
         console.log('--- SIGNUP FACTORY START ---');
-        
+
+        this.startTime = Date.now();
+
         await this.callTool('navigate_page', { url: 'https://chatgpt.com/' });
-        await new Promise(r => setTimeout(r, 5000));
-        
+        await new Promise(r => setTimeout(r, 2000));
+
         let snapshot = await this.getSnapshot();
         let state = this.stateManager.detectState(snapshot);
-        
+
         if (state === 'CHAT_INTERFACE') {
             console.log('Detected existing session. Proceeding to verification.');
         } else {
             console.log('No existing session or blocked. Starting signup flow.');
-            const inbox = await this.emailProvider.createInbox();
-            this.email = inbox.inbox_id;
+            if (!this.email) {
+                const inbox = await this.emailProvider.createInbox();
+                this.email = inbox.inbox_id;
+                this.agentMailInbox = inbox.inbox_id;
+            }
             console.log('Target Email:', this.email);
             await this.callTool('navigate_page', { url: 'https://chatgpt.com/auth/login' });
         }
-        
+
         let attempts = 0;
         let lastState = null;
         let stateCounter = 0;
+        let stateStartTime = Date.now();
 
-        while (attempts < 50) {
+        while (attempts < 60) {
+            if (Date.now() - this.startTime > this.runConfig.MAX_RUN_MS) {
+                await this.failWithDebug('MAX_RUN_MS_EXCEEDED', snapshot);
+            }
+
             attempts++;
-            const snapshot = await this.getSnapshot();
+            snapshot = await this.getSnapshot();
             fs.writeFileSync('debug_snapshot.txt', snapshot);
-            const state = this.stateManager.detectState(snapshot);
+            state = this.stateManager.detectState(snapshot);
             console.log(`[Step ${attempts}] State: ${state}`);
 
             if (state === 'CHAT_INTERFACE') {
@@ -115,50 +139,44 @@ export class SignupFactory {
                 return true;
             }
 
-            if (state === lastState && state !== 'UNKNOWN') {
+            if (state === lastState) {
                 stateCounter++;
             } else {
                 lastState = state;
                 stateCounter = 1;
+                stateStartTime = Date.now();
             }
 
-            // Delta strategy: if stuck for 3 snapshots, try something else
-            // Mandate: "stays in the same state for more than 3 consecutive snapshots without a successful action"
-            // We'll try to act in every step. If stateCounter reaches 4, it means 3 actions failed to change state.
-            if (stateCounter === 2) {
-                console.log(`[Step ${attempts}] STUCK in ${state} for 2 steps. Trying Delta: Escape`);
-                await this.callTool('press_key', { key: 'Escape' });
-            } else if (stateCounter === 3) {
-                console.log(`[Step ${attempts}] STUCK in ${state} for 3 steps. Trying Delta: Refresh (F5)`);
-                await this.callTool('press_key', { key: 'F5' });
-            } else if (stateCounter > 3) {
-                const dump = {
-                    state,
-                    attempts,
-                    snapshot: snapshot
-                };
-                const dumpStr = JSON.stringify(dump, null, 2);
-                fs.writeFileSync('STUCK_STATE_DUMP.json', dumpStr);
-                console.error('STUCK_STATE detected. Dumping accessibility tree:');
-                console.error(dumpStr);
-                throw new Error(`STUCK_STATE: ${state} for ${stateCounter} steps`);
-            } else {
-                // Normal handling
-                try {
-                    const acted = await this.handleState(state, snapshot);
-                    if (acted) {
-                        // We reset or decrement counter if we think we did something? 
-                        // Actually, if we acted and state remains same, we are still potentially stuck.
-                        // But some states like ONBOARDING have multiple screens.
-                    }
-                } catch (e) {
-                    console.error('Error handling state:', e.message);
-                }
+            if (Date.now() - stateStartTime > this.runConfig.STEP_TIMEOUT_MS) {
+                await this.failWithDebug(`STEP_TIMEOUT: ${state}`, snapshot);
             }
 
-            await new Promise(r => setTimeout(r, 5000));
+            if (stateCounter > this.runConfig.STATE_STUCK_LIMIT) {
+                await this.failWithDebug(`STUCK_STATE: ${state}`, snapshot);
+            }
+
+            try {
+                await this.handleState(state, snapshot);
+            } catch (e) {
+                await this.failWithDebug(`STATE_ERROR: ${state} - ${e.message}`, snapshot);
+            }
+
+            await new Promise(r => setTimeout(r, 1000));
         }
         throw new Error('Automation timed out');
+    }
+
+    async failWithDebug(reason, snapshot) {
+        console.error(`!!! CRITICAL FAILURE: ${reason} !!!`);
+        if (snapshot) {
+            fs.writeFileSync('failure_snap.txt', snapshot);
+        }
+        try {
+            await this.callTool('take_screenshot', { filePath: 'failure_screenshot.png' });
+        } catch (e) {
+            console.error('Failed to capture screenshot:', e.message);
+        }
+        throw new Error(reason);
     }
 
     async fillField(uid, value) {
@@ -199,14 +217,15 @@ export class SignupFactory {
                 }
                 break;
             case 'OTP_VERIFICATION':
-                const code = await this.emailProvider.waitForCode(this.email, 60000);
-                if (code) {
-                    const codeInput = snapshot.match(/uid=(\d+_\d+) textbox "Code"/i);
-                    if (codeInput) {
-                        await this.fillField(codeInput[1], code);
-                        await this.callTool('press_key', { key: 'Enter' });
-                        acted = true;
-                    }
+                const code = await this.emailProvider.waitForCode(this.agentMailInbox || this.email, this.runConfig.OTP_TIMEOUT_MS);
+                if (!code) {
+                    throw new Error('OTP_TIMEOUT');
+                }
+                const codeInput = snapshot.match(/uid=(\d+_\d+) textbox "Code"/i);
+                if (codeInput) {
+                    await this.fillField(codeInput[1], code);
+                    await this.callTool('press_key', { key: 'Enter' });
+                    acted = true;
                 }
                 break;
             case 'ABOUT_YOU':
@@ -303,6 +322,26 @@ export class SignupFactory {
     async cleanup() {
         if (this.browser) await this.browser.close();
     }
+}
+
+export function selectBestPageFromUrls(urls) {
+  if (!urls || urls.length === 0) return null;
+
+  const priorities = ['checkout.stripe.com', 'stripe.com', 'chatgpt.com'];
+  for (const priority of priorities) {
+    for (let i = urls.length - 1; i >= 0; i--) {
+      const url = urls[i];
+      if (url && url !== 'about:blank' && url.includes(priority)) {
+        return url;
+      }
+    }
+  }
+
+  for (let i = urls.length - 1; i >= 0; i--) {
+    const url = urls[i];
+    if (url && url !== 'about:blank') return url;
+  }
+  return null;
 }
 
 export function findChatInputUid(snapshot) {

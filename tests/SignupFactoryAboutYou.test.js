@@ -1,4 +1,9 @@
-import { detectSplitDobUids, findChatInputUid } from '../src/SignupFactory.js';
+import { detectSplitDobUids, findChatInputUid, selectBestPageFromUrls } from '../src/SignupFactory.js';
+
+test('selectBestPageFromUrls prefers stripe checkout', () => {
+  const urls = ['about:blank', 'https://chatgpt.com/', 'https://checkout.stripe.com/pay/cs_test'];
+  expect(selectBestPageFromUrls(urls)).toBe('https://checkout.stripe.com/pay/cs_test');
+});
 
 test('detectSplitDobUids returns day/month/year uids', () => {
   const snapshot = `uid=1_0 RootWebArea
