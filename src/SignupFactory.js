@@ -212,26 +212,24 @@ export class SignupFactory {
             case 'ABOUT_YOU':
                 console.log('Handling ABOUT_YOU...');
                 const nameInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Full name"/i);
-                const birthdayFields = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"month/i);
                 
                 if (nameInp) {
                     await this.fillField(nameInp[1], 'Agent User');
                     acted = true;
                 }
                 
-                const monthInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"month/i);
-                const dayInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"day/i);
-                const yearInp = snapshot.match(/uid=(\d+_\d+) (?:spinbutton|textbox).*?"year/i);
-                const birthdayInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Birthday"/i);
-
-                if (birthdayInp) {
-                    await this.fillField(birthdayInp[1], '01/01/1990');
+                const splitDob = detectSplitDobUids(snapshot);
+                if (splitDob) {
+                    await this.fillField(splitDob.day, '01');
+                    await this.fillField(splitDob.month, '01');
+                    await this.fillField(splitDob.year, '1990');
                     acted = true;
-                } else if (monthInp || dayInp || yearInp) {
-                    if (monthInp) await this.fillField(monthInp[1], '1');
-                    if (dayInp) await this.fillField(dayInp[1], '1');
-                    if (yearInp) await this.fillField(yearInp[1], '1990');
-                    acted = true;
+                } else {
+                    const birthdayInp = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea) "Birthday"/i);
+                    if (birthdayInp) {
+                        await this.fillField(birthdayInp[1], '01/01/1990');
+                        acted = true;
+                    }
                 }
 
                 if (acted) {
@@ -296,4 +294,14 @@ export class SignupFactory {
     async cleanup() {
         if (this.browser) await this.browser.close();
     }
+}
+
+export function detectSplitDobUids(snapshot) {
+  const day = snapshot.match(/uid=(\d+_\d+) spinbutton "Day"/i);
+  const month = snapshot.match(/uid=(\d+_\d+) spinbutton "Month"/i);
+  const year = snapshot.match(/uid=(\d+_\d+) spinbutton "Year"/i);
+  if (day && month && year) {
+    return { day: day[1], month: month[1], year: year[1] };
+  }
+  return null;
 }
