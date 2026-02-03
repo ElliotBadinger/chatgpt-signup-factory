@@ -6,6 +6,7 @@ import { logger } from '../chrome-devtools-mcp/build/src/logger.js';
 import { loadIssueDescriptions } from '../chrome-devtools-mcp/build/src/issue-descriptions.js';
 import { AgentMailProvider } from './AgentMailProvider.js';
 import { ChatGPTStateManager } from './ChatGPTStateManager.js';
+import { getRunConfig } from './RunConfig.js';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
@@ -32,13 +33,14 @@ global.self = global;
 const PROFILE_DIR = path.join(os.homedir(), '.cache', 'chatgpt-factory-profile');
 
 export class SignupFactory {
-    constructor(agentMailApiKey) {
+    constructor(agentMailApiKey, runConfig = getRunConfig()) {
         this.emailProvider = new AgentMailProvider(agentMailApiKey);
         this.stateManager = new ChatGPTStateManager();
         this.browser = null;
         this.context = null;
         this.email = null;
         this.password = 'AutomationTest123!';
+        this.config = runConfig;
     }
 
     async init() {
@@ -74,16 +76,24 @@ export class SignupFactory {
     }
 
     async getSnapshot() {
-        const resp = await this.callTool('take_snapshot', { verbose: true });
-        if (!resp || resp.length === 0) return "";
-        return resp[0].text || "";
+        for (let attempt = 0; attempt < 2; attempt++) {
+            const resp = await this.callTool('take_snapshot', { verbose: true });
+            if (resp && resp.length > 0 && resp[0].text) {
+                return resp[0].text;
+            }
+            if (attempt === 0) {
+                await new Promise(r => setTimeout(r, this.config.SNAPSHOT_RETRY_MS));
+            }
+        }
+        return "";
     }
 
     async run() {
         console.log('--- SIGNUP FACTORY START ---');
+        const startTime = Date.now();
         
         await this.callTool('navigate_page', { url: 'https://chatgpt.com/' });
-        await new Promise(r => setTimeout(r, 5000));
+        await new Promise(r => setTimeout(r, this.config.STEP_TIMEOUT_MS));
         
         let snapshot = await this.getSnapshot();
         let state = this.stateManager.detectState(snapshot);
@@ -104,6 +114,9 @@ export class SignupFactory {
 
         while (attempts < 50) {
             attempts++;
+            if (Date.now() - startTime > this.config.MAX_RUN_MS) {
+                throw new Error(`MAX_RUN_MS exceeded after ${Date.now() - startTime}ms`);
+            }
             const snapshot = await this.getSnapshot();
             fs.writeFileSync('debug_snapshot.txt', snapshot);
             const state = this.stateManager.detectState(snapshot);
@@ -131,7 +144,7 @@ export class SignupFactory {
             } else if (stateCounter === 3) {
                 console.log(`[Step ${attempts}] STUCK in ${state} for 3 steps. Trying Delta: Refresh (F5)`);
                 await this.callTool('press_key', { key: 'F5' });
-            } else if (stateCounter > 3) {
+            } else if (stateCounter > this.config.STATE_STUCK_LIMIT) {
                 const dump = {
                     state,
                     attempts,
@@ -156,7 +169,7 @@ export class SignupFactory {
                 }
             }
 
-            await new Promise(r => setTimeout(r, 5000));
+            await new Promise(r => setTimeout(r, this.config.STEP_TIMEOUT_MS));
         }
         throw new Error('Automation timed out');
     }
@@ -199,7 +212,7 @@ export class SignupFactory {
                 }
                 break;
             case 'OTP_VERIFICATION':
-                const code = await this.emailProvider.waitForCode(this.email, 60000);
+                const code = await this.emailProvider.waitForCode(this.email, this.config.OTP_TIMEOUT_MS);
                 if (code) {
                     const codeInput = snapshot.match(/uid=(\d+_\d+) textbox "Code"/i);
                     if (codeInput) {

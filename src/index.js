@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { SignupFactory } from './SignupFactory.js';
+import { getRunConfig } from './RunConfig.js';
 
 const API_KEY = process.env.AGENTMAIL_API_KEY;
 if (!API_KEY) {
@@ -8,7 +9,8 @@ if (!API_KEY) {
 }
 
 async function main() {
-    const factory = new SignupFactory(API_KEY);
+    const runConfig = getRunConfig();
+    const factory = new SignupFactory(API_KEY, runConfig);
     try {
         await factory.init();
         await factory.run();
