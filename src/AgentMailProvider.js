@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 export class AgentMailProvider {
   constructor(apiKey) {
     this.apiKey = apiKey;
@@ -33,6 +31,13 @@ export class AgentMailProvider {
     });
     if (!res.ok) throw new Error(`AgentMail failed: ${res.statusText}`);
     return await res.json();
+  }
+
+  async deleteInbox(inboxId) {
+    await fetch(`${this.baseUrl}/inboxes/${inboxId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${this.apiKey}` }
+    });
   }
 
   async waitForCode(inboxId, timeoutMs = 60000) {
