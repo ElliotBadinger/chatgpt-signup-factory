@@ -283,7 +283,8 @@ export class SignupFactory {
                 }
                 break;
             case 'ACCESS_DENIED':
-                throw new Error('ACCESS_DENIED_IP_BLOCKED');
+                await this.failWithDebug('ACCESS_DENIED', snapshot);
+                break;
         }
         return acted;
     }
