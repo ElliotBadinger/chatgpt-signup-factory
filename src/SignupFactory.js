@@ -271,29 +271,54 @@ export class SignupFactory {
 
     async verifyAccount(snapshot) {
         console.log('Sending final verification message...');
-        const inputMatch = snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea|paragraph).*?prompt/i) || 
-                           snapshot.match(/uid=(\d+_\d+) (?:textbox|textarea|paragraph).*?message/i) ||
-                           snapshot.match(/uid=(\d+_\d+) paragraph[\s\S]*?Ask anything/i);
-        if (inputMatch) {
-            const uid = inputMatch[1];
-            await this.callTool('click', { uid });
-            await this.callTool('fill', { uid, value: 'Please respond with exactly: SUCCESS_AGENT_VERIFIED' });
-            await this.callTool('press_key', { key: 'Enter' });
-            await new Promise(r => setTimeout(r, 15000));
-            const result = await this.getSnapshot();
-            console.log('--- CHATGPT VERIFICATION RESPONSE ---');
-            console.log(result);
-            if (result.includes('SUCCESS_AGENT_VERIFIED')) {
-                console.log('--- VERIFICATION SUCCESS ---');
-            } else {
-                console.warn('--- VERIFICATION FAILED: Handshake not found in response ---');
+        let currentSnapshot = snapshot;
+        
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            const uid = findChatInputUid(currentSnapshot);
+            if (uid) {
+                await this.callTool('click', { uid });
+                await this.callTool('fill', { uid, value: 'Please respond with exactly: SUCCESS_AGENT_VERIFIED' });
+                await this.callTool('press_key', { key: 'Enter' });
+                await new Promise(r => setTimeout(r, 15000));
+                
+                const result = await this.getSnapshot();
+                console.log('--- CHATGPT VERIFICATION RESPONSE ---');
+                console.log(result);
+                
+                if (result.includes('SUCCESS_AGENT_VERIFIED')) {
+                    console.log('--- VERIFICATION SUCCESS ---');
+                    return;
+                }
+            }
+            
+            if (attempt < 3) {
+                console.warn(`Attempt ${attempt} failed to verify. Retrying...`);
+                await new Promise(r => setTimeout(r, 2000));
+                currentSnapshot = await this.getSnapshot();
             }
         }
+        console.warn('--- VERIFICATION FAILED: Handshake not found in response after 3 attempts ---');
     }
 
     async cleanup() {
         if (this.browser) await this.browser.close();
     }
+}
+
+export function findChatInputUid(snapshot) {
+  const rules = [
+    /uid=(\d+_\d+) (?:textbox|textarea|contenteditable).*?(?:message|prompt)/i,
+    /uid=(\d+_\d+) paragraph.*?(?:message|prompt)/i,
+    /uid=(\d+_\d+) (?:paragraph|generic).*?Ask anything/i,
+    /uid=(\d+_\d+) (?:textbox|textarea|contenteditable)/i,
+    /uid=(\d+_\d+) .*?role="textbox"/i
+  ];
+
+  for (const rule of rules) {
+    const match = snapshot.match(rule);
+    if (match) return match[1];
+  }
+  return null;
 }
 
 export function detectSplitDobUids(snapshot) {
