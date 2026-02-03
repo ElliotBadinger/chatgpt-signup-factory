@@ -36,10 +36,10 @@ async function main() {
             await factory.init();
             await factory.run();
             console.log('SUCCESS: ChatGPT account provisioned and ready.');
-            process.exit(0);
+            process.exitCode = 0;
         } catch (err) {
             console.error('FATAL ERROR:', err);
-            process.exit(1);
+            process.exitCode = 1;
         } finally {
             await factory.cleanup();
         }
