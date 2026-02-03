@@ -53,4 +53,18 @@ describe('ChatGPTStateManager', () => {
     const snapshot = `Access denied\nReference #123`;
     expect(manager.detectState(snapshot)).toBe('ACCESS_DENIED');
   });
+
+  test('detects CHAT_INTERFACE for What’s on your mind today?', () => {
+    const snapshot = `uid=1_0 RootWebArea "ChatGPT"
+    uid=1_10 StaticText "What’s on your mind today?"
+    uid=1_20 paragraph`;
+    expect(manager.detectState(snapshot)).toBe('CHAT_INTERFACE');
+  });
+
+  test("detects CHAT_INTERFACE for What's on your mind today?", () => {
+    const snapshot = `uid=1_0 RootWebArea "ChatGPT"
+    uid=1_10 StaticText "What's on your mind today?"
+    uid=1_20 paragraph`;
+    expect(manager.detectState(snapshot)).toBe('CHAT_INTERFACE');
+  });
 });

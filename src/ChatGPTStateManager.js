@@ -3,7 +3,7 @@ export class ChatGPTStateManager {
     if (snapshot.includes('Access denied') || snapshot.includes('Reference #')) {
       return 'ACCESS_DENIED';
     }
-    if (snapshot.includes('StaticText "Ask anything"') || snapshot.includes('What can I help with?') || snapshot.includes('What’s on your mind today') || snapshot.includes('What are you working on?') || (snapshot.includes('paragraph') && (snapshot.includes('prompt') || snapshot.includes('message')))) {
+    if (snapshot.includes('StaticText "Ask anything"') || snapshot.includes('What can I help with?') || snapshot.includes('What’s on your mind today?') || snapshot.includes("What's on your mind today?") || snapshot.includes('What are you working on?') || (snapshot.includes('paragraph') && (snapshot.includes('prompt') || snapshot.includes('message')))) {
       return 'CHAT_INTERFACE';
     }
     if (snapshot.includes("Let's confirm your age") || snapshot.includes('textbox "Full name"')) {

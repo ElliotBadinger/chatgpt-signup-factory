@@ -1,12 +1,13 @@
 import { AgentMailProvider } from '../src/AgentMailProvider.js';
 
 const API_KEY = process.env.AGENTMAIL_API_KEY;
+const describeIfKey = API_KEY ? describe : describe.skip;
 
 if (!API_KEY) {
-    throw new Error('AGENTMAIL_API_KEY environment variable is required for tests');
+  console.warn('Skipping AgentMailProvider tests: AGENTMAIL_API_KEY not set.');
 }
 
-describe('AgentMailProvider', () => {
+describeIfKey('AgentMailProvider', () => {
   let provider;
 
   beforeAll(() => {
