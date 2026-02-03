@@ -41,4 +41,16 @@ describe('ChatGPTStateManager', () => {
       uid=1_10 StaticText "Ask anything"`;
     expect(manager.detectState(snapshot)).toBe('CHAT_INTERFACE');
   });
+
+  test('detects CHAT_INTERFACE for What can I help with?', () => {
+    const snapshot = `uid=1_0 RootWebArea "ChatGPT"
+    uid=1_10 StaticText "What can I help with?"
+    uid=1_20 paragraph`;
+    expect(manager.detectState(snapshot)).toBe('CHAT_INTERFACE');
+  });
+
+  test('detects ACCESS_DENIED', () => {
+    const snapshot = `Access denied\nReference #123`;
+    expect(manager.detectState(snapshot)).toBe('ACCESS_DENIED');
+  });
 });
