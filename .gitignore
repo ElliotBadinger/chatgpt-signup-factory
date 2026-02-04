@@ -2,7 +2,7 @@ node_modules
 .worktrees
 
 # E2E artifacts (snapshots/screenshots)
-artifacts/
+/artifacts/
 *_snapshot.txt
 *_screenshot.png
 failure_meta*.json
