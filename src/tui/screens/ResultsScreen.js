@@ -20,6 +20,12 @@ export function ResultsScreen({ runMeta }) {
       h(Text, { color: 'red', bold: true }, 'Error:'),
       h(Text, null, runMeta.error)
     ) : null,
+    runMeta.vaultWarning ? h(
+      Box,
+      { flexDirection: 'column', marginBottom: 1 },
+      h(Text, { color: 'yellow', bold: true }, 'Vault Warning:'),
+      h(Text, null, runMeta.vaultWarning)
+    ) : null,
     h(Text, null, `Run ID:   ${runMeta.runId || 'N/A'}`),
     h(Text, null, `Location: ${runMeta.runDir || 'N/A'}`),
     h(Text, null, `Bundle:   ${runMeta.runDir ? `${runMeta.runDir}/run.bundle.json` : 'N/A'}`),

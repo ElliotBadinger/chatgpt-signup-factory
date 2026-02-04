@@ -126,5 +126,12 @@ describe('TUI Screens UX', () => {
       expect(lastFrame()).toContain('SUCCESS');
       expect(lastFrame()).toContain('/path/to/run');
     });
+
+    it('shows vault warning when present', () => {
+      const runMeta = { status: 'success', vaultWarning: 'Vault save failed' };
+      const { lastFrame } = render(React.createElement(ResultsScreen, { runMeta }));
+      expect(lastFrame()).toContain('Vault Warning');
+      expect(lastFrame()).toContain('Vault save failed');
+    });
   });
 });

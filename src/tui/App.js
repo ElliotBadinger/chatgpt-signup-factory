@@ -38,7 +38,14 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
 
   const [ui, dispatch] = useReducer(reducer, undefined, createInitialState);
   const [config, setConfig] = useState(() => validateConfig(initialConfig || {}));
-  const [vault, setVault] = useState({ enabled: false, unlocked: false, passcode: null, account: null, error: null, mode: 'unlock' });
+  const [vault, setVault] = useState({
+    unlocked: false,
+    passcode: null,
+    pendingPasscode: null,
+    account: null,
+    error: null,
+    mode: 'unlock',
+  });
   const [timeline, setTimeline] = useState([]);
   const [artifacts, setArtifacts] = useState([]);
   const [failureSnapshotExcerpt, setFailureSnapshotExcerpt] = useState(null);
@@ -87,7 +94,12 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
     if (config.safety?.persistSecrets) {
       const vPath = getVaultPath();
       const exists = fs.existsSync(vPath);
-      setVault(v => ({ ...v, mode: exists ? 'unlock' : 'create', error: null }));
+      setVault(v => ({
+        ...v,
+        mode: exists ? 'unlock' : 'create',
+        error: null,
+        pendingPasscode: null,
+      }));
       dispatch({ type: 'VAULT_OPEN' });
     } else {
       dispatch({ type: 'NAV_NEXT' });
@@ -98,23 +110,60 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
     if (vault.mode === 'unlock') {
       try {
         const data = loadVault({ passcode });
-        setVault(v => ({ ...v, unlocked: true, passcode, account: data.account, error: null }));
+        const account = {
+          email: data?.account?.email,
+          password: data?.account?.password,
+          agentMailInbox: data?.account?.agentMailInbox,
+        };
+        setVault(v => ({
+          ...v,
+          unlocked: true,
+          passcode,
+          account,
+          error: null,
+        }));
         setConfig(c => ({
           ...c,
-          identity: { ...c.identity, ...data.account },
-          billing: { ...c.billing, ...data.billing }
+          identity: { ...c.identity, email: account.email, password: account.password },
+          billing: { ...c.billing, ...(data?.billing || {}) }
         }));
         dispatch({ type: 'NAV_NEXT' });
       } catch (e) {
         setVault(v => ({ ...v, error: 'Incorrect passcode' }));
       }
-    } else {
-      setVault(v => ({ ...v, unlocked: true, passcode, error: null }));
+      return;
+    }
+
+    if (vault.mode === 'create') {
+      setVault(v => ({ ...v, pendingPasscode: passcode, mode: 'confirm', error: null }));
+      return;
+    }
+
+    if (vault.mode === 'confirm') {
+      if (passcode !== vault.pendingPasscode) {
+        setVault(v => ({ ...v, pendingPasscode: null, mode: 'create', error: 'Passcodes do not match' }));
+        return;
+      }
+      setVault(v => ({
+        ...v,
+        unlocked: true,
+        passcode,
+        pendingPasscode: null,
+        error: null,
+      }));
       dispatch({ type: 'NAV_NEXT' });
     }
   };
 
   const handleVaultCancel = () => {
+    setVault({
+      unlocked: false,
+      passcode: null,
+      pendingPasscode: null,
+      account: null,
+      error: null,
+      mode: 'unlock',
+    });
     dispatch({ type: 'VAULT_CANCEL' });
   };
 
@@ -190,7 +239,10 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
       
       let provisioned;
       if (vault.unlocked && vault.account) {
-        provisioned = vault.account;
+        provisioned = {
+          address: vault.account.email,
+          inboxId: vault.account.agentMailInbox,
+        };
       } else {
         provisioned = await provisioner.provision();
       }
@@ -205,18 +257,25 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
 
       artifactManager.updateManifest({ status: 'success' });
       
-      if (vault.unlocked && vault.passcode) {
-        saveVault({
-          passcode: vault.passcode,
-          data: {
-            account: {
-              email: provisioned.email,
-              password: provisioned.password,
-              agentMailInbox: provisioned.agentMailInbox
-            },
-            billing: config.billing
-          }
-        });
+      if (config.safety?.persistSecrets && vault.unlocked && vault.passcode) {
+        try {
+          saveVault({
+            passcode: vault.passcode,
+            data: {
+              account: {
+                email: provisioned.address,
+                password: config.identity.password,
+                agentMailInbox: provisioned.inboxId
+              },
+              billing: config.billing
+            }
+          });
+        } catch (e) {
+          setRunMeta((prev) => ({
+            ...prev,
+            vaultWarning: `Vault save failed: ${String(e?.message || e)}`
+          }));
+        }
       }
 
       setRunMeta((prev) => ({ ...prev, status: 'success' }));
