@@ -22,6 +22,15 @@ import { ResultsScreen } from './screens/ResultsScreen.js';
 
 const h = React.createElement;
 
+const redactSnapshotText = (text) => {
+  if (!text || typeof text !== 'string') return '';
+  const masked = text
+    .replace(/(password|cvc|cardNumber)\s*[:=]\s*\S+/gi, '$1: [REDACTED]')
+    .replace(/\b([A-Z0-9._%+-]{1,})@([A-Z0-9.-]+\.[A-Z]{2,})\b/gi, '***@$2')
+    .replace(/\b\d{12,19}\b/g, (match) => `**** **** **** ${match.slice(-4)}`);
+  return masked;
+};
+
 export default function App({ isActive: isActiveProp, configPath = 'config.yaml' } = {}) {
   const { exit } = useApp();
 
@@ -117,7 +126,8 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
         if (ev.path.endsWith('.txt')) {
           try {
             const content = fs.readFileSync(ev.path, 'utf8');
-            const excerpt = content.slice(0, 200).replace(/[\r\n]+/g, ' ').trim();
+            const redacted = redactSnapshotText(content);
+            const excerpt = redacted.slice(0, 200).replace(/[\r\n]+/g, ' ').trim();
             setFailureSnapshotExcerpt(excerpt);
           } catch (e) {
             // ignore read errors
