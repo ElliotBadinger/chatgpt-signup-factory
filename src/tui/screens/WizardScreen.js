@@ -51,6 +51,17 @@ export function WizardScreen({ config, setConfig, onNext, onLoadYaml, onSaveYaml
           }));
         }
       }
+      if (section === 'safety') {
+        if (lower === 'p') {
+          setConfig((c) => ({
+            ...c,
+            safety: {
+              ...(c.safety || {}),
+              persistSecrets: !(c.safety && c.safety.persistSecrets)
+            }
+          }));
+        }
+      }
     },
     { isActive }
   );
@@ -79,7 +90,7 @@ export function WizardScreen({ config, setConfig, onNext, onLoadYaml, onSaveYaml
         );
       case 'safety':
         return h(Box, { flexDirection: 'column' },
-          h(Text, null, `Enabled: ${config.safety?.enabled ? 'Yes' : 'No'}`)
+          h(Text, null, `Persist Secrets: ${config.safety?.persistSecrets ? 'Yes' : 'No'}`)
         );
       case 'artifacts':
         return h(Box, { flexDirection: 'column' },
@@ -114,10 +125,11 @@ export function WizardScreen({ config, setConfig, onNext, onLoadYaml, onSaveYaml
       h(Text, { bold: true }, 'PREVIEW (REDACTED)'),
       h(Text, { dimColor: true }, JSON.stringify(configRedacted, null, 2))
     ),
-    h(Box, { flexDirection: 'row' },
+    h(Box, { flexDirection: 'row', flexWrap: 'wrap' },
       h(Text, { dimColor: true }, '[l] Load YAML  '),
       h(Text, { dimColor: true }, '[s] Save YAML  '),
       h(Text, { dimColor: true }, '[Tab] Switch Section  '),
+      h(Text, { dimColor: true }, '[p] Toggle Persist Secrets  '),
       h(Text, { dimColor: true }, 'Enter → Preflight')
     )
   );
