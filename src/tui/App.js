@@ -1,0 +1,203 @@
+import React, { useMemo, useReducer, useRef, useState } from 'react';
+import { useApp, useInput } from 'ink';
+
+import { validateConfig, loadConfig, saveConfig } from '../config/manager.js';
+import { redactConfig } from '../config/redaction.js';
+import { ArtifactManager } from '../artifacts/ArtifactManager.js';
+import { RunOrchestrator } from '../orchestrator/RunOrchestrator.js';
+import { Events } from '../orchestrator/events.js';
+import { AgentMailProvider } from '../AgentMailProvider.js';
+import { EmailProvisioner } from '../EmailProvisioner.js';
+import { PreflightResult } from '../models/PreflightResult.js';
+
+import { createInitialState, reducer, Screens } from './stateMachine.js';
+import { WizardScreen } from './screens/WizardScreen.js';
+import { PreflightScreen } from './screens/PreflightScreen.js';
+import { ConfirmScreen } from './screens/ConfirmScreen.js';
+import { RunningScreen } from './screens/RunningScreen.js';
+import { ResultsScreen } from './screens/ResultsScreen.js';
+
+const h = React.createElement;
+
+export default function App() {
+  const { exit } = useApp();
+
+  const [ui, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const [config, setConfig] = useState(() => validateConfig({}));
+  const [timeline, setTimeline] = useState([]);
+  const [artifacts, setArtifacts] = useState([]);
+  const [runMeta, setRunMeta] = useState({ status: 'idle', runId: null, runDir: null, error: null });
+
+  // Checkpoint (before subscribe) approval bridge
+  const checkpointResolveRef = useRef(null);
+  const [checkpointPending, setCheckpointPending] = useState(false);
+
+  const isActive = Boolean(process.stdin && process.stdin.isTTY);
+
+  useInput(
+    (input, key) => {
+      if (key.ctrl && input === 'c') {
+        exit();
+      }
+      if (ui.screen === Screens.RESULTS && input.toLowerCase() === 'q') {
+        exit();
+      }
+    },
+    { isActive }
+  );
+
+  const preflight = useMemo(() => {
+    const res = new PreflightResult();
+    res.addCheck('Environment', true);
+    if (!process.env.AGENTMAIL_API_KEY) {
+      res.addCheck('AgentMail API Key', false, 'Missing AGENTMAIL_API_KEY in .env');
+    } else {
+      res.addCheck('AgentMail API Key', true);
+    }
+    return res;
+  }, []);
+
+  const handleLoadYaml = () => {
+    try {
+      const loaded = loadConfig('config.yaml');
+      setConfig(loaded);
+    } catch (e) {
+      // Potentially show error in UI
+    }
+  };
+
+  const handleSaveYaml = () => {
+    try {
+      saveConfig('config.yaml', config);
+    } catch (e) {
+      // Potentially show error in UI
+    }
+  };
+
+  const startRun = async () => {
+    dispatch({ type: 'RUN_START' });
+    setRunMeta({ status: 'running', runId: null, runDir: null, error: null });
+    setTimeline([]);
+    setArtifacts([]);
+
+    const artifactManager = new ArtifactManager({ baseDir: config.artifacts.outputDir, config });
+    setRunMeta((prev) => ({ ...prev, runId: artifactManager.getRunId(), runDir: artifactManager.getRunDir() }));
+    artifactManager.updateManifest({ status: 'running' });
+
+    const checkpointProvider = {
+      approve: async () => {
+        setCheckpointPending(true);
+        return await new Promise((resolve) => {
+          checkpointResolveRef.current = (approved) => {
+            setCheckpointPending(false);
+            resolve(approved);
+          };
+        });
+      },
+    };
+
+    const orchestrator = new RunOrchestrator({
+      agentMailApiKey: process.env.AGENTMAIL_API_KEY,
+      checkpointProvider,
+    });
+
+    const pushEvent = (ev) => {
+      setTimeline((tl) => [...tl, { ts: Date.now(), ...ev }].slice(-200));
+      if (ev.type === Events.ARTIFACT_WRITTEN) {
+        setArtifacts(a => [...a, ev.path]);
+      }
+    };
+
+    orchestrator.on(Events.RUN_START, pushEvent);
+    orchestrator.on(Events.STATE_CHANGE, pushEvent);
+    orchestrator.on(Events.ARTIFACT_WRITTEN, pushEvent);
+    orchestrator.on(Events.CHECKPOINT_BEFORE_SUBSCRIBE, pushEvent);
+    orchestrator.on(Events.RUN_SUCCESS, pushEvent);
+    orchestrator.on(Events.RUN_FAILURE, pushEvent);
+
+    let provisioner = null;
+
+    try {
+      const agentMailProvider = new AgentMailProvider(process.env.AGENTMAIL_API_KEY);
+      provisioner = new EmailProvisioner({ agentMailProvider, env: process.env });
+      const provisioned = await provisioner.provision();
+
+      await orchestrator.run({
+        config: {
+          email: provisioned.address,
+          agentMailInbox: provisioned.inboxId,
+          password: config.identity.password || undefined,
+          headless: config.run.headless,
+          runConfig: {
+            MAX_RUN_MS: config.run.maxRunMs,
+            STEP_TIMEOUT_MS: config.run.stepTimeoutMs,
+            OTP_TIMEOUT_MS: config.identity.otpTimeoutMs,
+            SNAPSHOT_RETRY_MS: 3000,
+            STATE_STUCK_LIMIT: 10,
+          },
+          userDataDir: process.env.USER_DATA_DIR || undefined,
+          artifactDir: artifactManager.getRunDir(),
+        },
+      });
+
+      artifactManager.updateManifest({ status: 'success' });
+      setRunMeta((prev) => ({ ...prev, status: 'success' }));
+      dispatch({ type: 'RUN_SUCCESS' });
+    } catch (e) {
+      artifactManager.updateManifest({ status: 'failure', failure_summary: String(e?.message || e) });
+      setRunMeta((prev) => ({ ...prev, status: 'failure', error: String(e?.message || e) }));
+      dispatch({ type: 'RUN_FAILURE', error: String(e?.message || e) });
+    } finally {
+      if (provisioner) {
+        try {
+          await provisioner.cleanup();
+        } catch {}
+      }
+    }
+  };
+
+  const approveCheckpoint = (approved) => {
+    if (checkpointResolveRef.current) {
+      checkpointResolveRef.current(approved);
+      checkpointResolveRef.current = null;
+    }
+  };
+
+  if (ui.screen === Screens.WIZARD) {
+    return h(WizardScreen, {
+      config,
+      setConfig,
+      onNext: () => dispatch({ type: 'NAV_NEXT' }),
+      onLoadYaml: handleLoadYaml,
+      onSaveYaml: handleSaveYaml,
+    });
+  }
+
+  if (ui.screen === Screens.PREFLIGHT) {
+    return h(PreflightScreen, {
+      preflight,
+      onBack: () => dispatch({ type: 'NAV_BACK' }),
+      onNext: () => dispatch({ type: 'NAV_NEXT' }),
+    });
+  }
+
+  if (ui.screen === Screens.CONFIRM) {
+    return h(ConfirmScreen, {
+      configRedacted: redactConfig(config),
+      onBack: () => dispatch({ type: 'NAV_BACK' }),
+      onStart: startRun,
+    });
+  }
+
+  if (ui.screen === Screens.RUNNING) {
+    return h(RunningScreen, {
+      timeline,
+      runMeta,
+      checkpointPending,
+      onCheckpointDecision: approveCheckpoint,
+      artifacts,
+    });
+  }
+
+  return h(ResultsScreen, { runMeta });
+}
