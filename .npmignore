@@ -1,0 +1,24 @@
+node_modules
+.worktrees
+
+# E2E artifacts (snapshots/screenshots)
+/artifacts/
+*_snapshot.txt
+*_screenshot.png
+failure_meta*.json
+auth_error_*
+restart_cloudflare_*
+
+step_*_preparse_*.png
+ambiguous_*
+failure_*
+checkout_*
+cloudflare_wait_*
+landing_*
+login_*
+turnstile_*
+
+# Include required DevTools frontend under chrome-devtools-mcp build
+!chrome-devtools-mcp/build/node_modules/
+!chrome-devtools-mcp/build/node_modules/chrome-devtools-frontend/
+!chrome-devtools-mcp/build/node_modules/chrome-devtools-frontend/**

@@ -1,6 +1,6 @@
 {
   "name": "@ElliotBadinger/account-factory",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "bin": {
     "signupx": "src/cli/signupx.js"
@@ -21,13 +21,17 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "1.26.0",
     "commander": "^11.1.0",
     "core-js": "^3.48.0",
+    "debug": "4.4.3",
     "ink": "^4.4.1",
+    "puppeteer-core": "24.36.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "^18.2.0",
     "yaml": "^2.8.2",
+    "yargs": "18.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
