@@ -8,7 +8,12 @@ test('renders unlock prompt', () => {
   expect(lastFrame()).toContain('Enter passcode to unlock');
 });
 
-test('renders create prompt with confirmation', () => {
+test('renders create prompt', () => {
   const { lastFrame } = render(React.createElement(VaultScreen, { mode: 'create', error: null }));
   expect(lastFrame()).toContain('Create a new passcode');
+});
+
+test('renders confirm prompt', () => {
+  const { lastFrame } = render(React.createElement(VaultScreen, { mode: 'confirm', error: null }));
+  expect(lastFrame()).toContain('Confirm passcode');
 });
