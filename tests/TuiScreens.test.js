@@ -6,9 +6,18 @@ import { PreflightScreen } from '../src/tui/screens/PreflightScreen.js';
 import { ConfirmScreen } from '../src/tui/screens/ConfirmScreen.js';
 import { RunningScreen } from '../src/tui/screens/RunningScreen.js';
 import { ResultsScreen } from '../src/tui/screens/ResultsScreen.js';
+import { VaultScreen } from '../src/tui/screens/VaultScreen.js';
 import { Events } from '../src/orchestrator/events.js';
 
 describe('TUI Screens UX', () => {
+  describe('VaultScreen', () => {
+    it('renders vault prompt', () => {
+      const { lastFrame } = render(React.createElement(VaultScreen, { mode: 'unlock' }));
+      expect(lastFrame()).toContain('Vault Passcode');
+      expect(lastFrame()).toContain('Enter passcode to unlock');
+    });
+  });
+
   describe('WizardScreen', () => {
     it('renders all required sections and redacted preview', () => {
       const config = { 

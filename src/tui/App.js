@@ -4,6 +4,7 @@ import { useApp, useInput } from 'ink';
 
 import { validateConfig, loadConfig, saveConfig } from '../config/manager.js';
 import { redactConfig } from '../config/redaction.js';
+import { getVaultPath, loadVault, saveVault } from '../security/vault.js';
 import { mapLoadedConfigToState, mapStateToRunConfig } from './configHelpers.js';
 import { ArtifactManager } from '../artifacts/ArtifactManager.js';
 import { RunOrchestrator } from '../orchestrator/RunOrchestrator.js';
@@ -15,6 +16,7 @@ import { RunLogger } from './runLogger.js';
 
 import { createInitialState, reducer, Screens } from './stateMachine.js';
 import { WizardScreen } from './screens/WizardScreen.js';
+import { VaultScreen } from './screens/VaultScreen.js';
 import { PreflightScreen } from './screens/PreflightScreen.js';
 import { ConfirmScreen } from './screens/ConfirmScreen.js';
 import { RunningScreen } from './screens/RunningScreen.js';
@@ -31,11 +33,12 @@ const redactSnapshotText = (text) => {
   return masked;
 };
 
-export default function App({ isActive: isActiveProp, configPath = 'config.yaml' } = {}) {
+export default function App({ isActive: isActiveProp, configPath = 'config.yaml', initialConfig } = {}) {
   const { exit } = useApp();
 
   const [ui, dispatch] = useReducer(reducer, undefined, createInitialState);
-  const [config, setConfig] = useState(() => validateConfig({}));
+  const [config, setConfig] = useState(() => validateConfig(initialConfig || {}));
+  const [vault, setVault] = useState({ enabled: false, unlocked: false, passcode: null, account: null, error: null, mode: 'unlock' });
   const [timeline, setTimeline] = useState([]);
   const [artifacts, setArtifacts] = useState([]);
   const [failureSnapshotExcerpt, setFailureSnapshotExcerpt] = useState(null);
@@ -78,6 +81,41 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
     } catch (e) {
       // Potentially show error in UI
     }
+  };
+
+  const handleWizardNext = () => {
+    if (config.safety?.persistSecrets) {
+      const vPath = getVaultPath();
+      const exists = fs.existsSync(vPath);
+      setVault(v => ({ ...v, mode: exists ? 'unlock' : 'create', error: null }));
+      dispatch({ type: 'VAULT_OPEN' });
+    } else {
+      dispatch({ type: 'NAV_NEXT' });
+    }
+  };
+
+  const handleVaultSubmit = (passcode) => {
+    if (vault.mode === 'unlock') {
+      try {
+        const data = loadVault({ passcode });
+        setVault(v => ({ ...v, unlocked: true, passcode, account: data.account, error: null }));
+        setConfig(c => ({
+          ...c,
+          identity: { ...c.identity, ...data.account },
+          billing: { ...c.billing, ...data.billing }
+        }));
+        dispatch({ type: 'NAV_NEXT' });
+      } catch (e) {
+        setVault(v => ({ ...v, error: 'Incorrect passcode' }));
+      }
+    } else {
+      setVault(v => ({ ...v, unlocked: true, passcode, error: null }));
+      dispatch({ type: 'NAV_NEXT' });
+    }
+  };
+
+  const handleVaultCancel = () => {
+    dispatch({ type: 'VAULT_CANCEL' });
   };
 
   const startRun = async () => {
@@ -149,7 +187,13 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
     try {
       const agentMailProvider = new AgentMailProvider(process.env.AGENTMAIL_API_KEY);
       provisioner = new EmailProvisioner({ agentMailProvider, env: process.env });
-      const provisioned = await provisioner.provision();
+      
+      let provisioned;
+      if (vault.unlocked && vault.account) {
+        provisioned = vault.account;
+      } else {
+        provisioned = await provisioner.provision();
+      }
 
       const runConfig = mapStateToRunConfig({
         state: config,
@@ -160,6 +204,21 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
       await orchestrator.run({ config: runConfig });
 
       artifactManager.updateManifest({ status: 'success' });
+      
+      if (vault.unlocked && vault.passcode) {
+        saveVault({
+          passcode: vault.passcode,
+          data: {
+            account: {
+              email: provisioned.email,
+              password: provisioned.password,
+              agentMailInbox: provisioned.agentMailInbox
+            },
+            billing: config.billing
+          }
+        });
+      }
+
       setRunMeta((prev) => ({ ...prev, status: 'success' }));
       dispatch({ type: 'RUN_SUCCESS' });
     } catch (e) {
@@ -186,9 +245,19 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
     return h(WizardScreen, {
       config,
       setConfig,
-      onNext: () => dispatch({ type: 'NAV_NEXT' }),
+      onNext: handleWizardNext,
       onLoadYaml: handleLoadYaml,
       onSaveYaml: handleSaveYaml,
+      isActive,
+    });
+  }
+
+  if (ui.screen === Screens.VAULT) {
+    return h(VaultScreen, {
+      mode: vault.mode,
+      error: vault.error,
+      onSubmit: handleVaultSubmit,
+      onCancel: handleVaultCancel,
       isActive,
     });
   }
