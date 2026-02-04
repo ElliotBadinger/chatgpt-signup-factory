@@ -1,9 +1,12 @@
 {
-  "name": "chatgpt-factory",
+  "name": "@ElliotBadinger/account-factory",
   "version": "1.0.0",
   "type": "module",
   "bin": {
     "signupx": "src/cli/signupx.js"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "main": "src/index.js",
   "directories": {
