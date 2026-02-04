@@ -3,6 +3,7 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import { redactConfig } from '../config/redaction.js';
 import { RunBundle } from './RunBundle.js';
+import { resolveArtifactPath } from './pathUtils.js';
 
 export class ArtifactManager {
   constructor({ baseDir = 'artifacts', config = {} } = {}) {
@@ -64,7 +65,7 @@ export class ArtifactManager {
     const subDir = this._getSubDirForKind(kind);
     const fullSubDir = path.join(this.runDir, subDir);
     this._ensureDir(fullSubDir);
-    return path.join(fullSubDir, filename);
+    return resolveArtifactPath(fullSubDir, filename);
   }
 
   recordArtifact(kind, filename) {

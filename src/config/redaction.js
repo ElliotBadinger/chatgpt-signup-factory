@@ -23,27 +23,32 @@ function maskCardNumber(cardNumber) {
  * - email: keep domain, mask local part to first 2 chars + '***'
  * - password/cvc: '[REDACTED]'
  * - cardNumber: '**** **** **** <last4>' and add derived billing.cardLast4
+ * - Recursive: any key named password/cvc/cardNumber found anywhere is redacted/masked.
  */
 export function redactConfig(config) {
   // structuredClone is available in modern Node; fall back to JSON for safety.
   const out = globalThis.structuredClone ? structuredClone(config ?? {}) : JSON.parse(JSON.stringify(config ?? {}));
 
-  if (out?.identity?.email) {
-    out.identity.email = maskEmail(out.identity.email);
-  }
-  if (out?.identity?.password) {
-    out.identity.password = '[REDACTED]';
-  }
+  if (out === null || typeof out !== 'object') return out;
 
-  if (out?.billing?.cvc) {
-    out.billing.cvc = '[REDACTED]';
-  }
+  const redactRecursive = (obj) => {
+    if (obj === null || typeof obj !== 'object') return;
 
-  if (out?.billing?.cardNumber) {
-    const { masked, last4 } = maskCardNumber(out.billing.cardNumber);
-    out.billing.cardNumber = masked;
-    if (last4) out.billing.cardLast4 = last4;
-  }
+    for (const key in obj) {
+      if (key === 'email' && typeof obj[key] === 'string') {
+        obj[key] = maskEmail(obj[key]);
+      } else if (key === 'password' || key === 'cvc') {
+        obj[key] = '[REDACTED]';
+      } else if (key === 'cardNumber' && typeof obj[key] === 'string') {
+        const { masked, last4 } = maskCardNumber(obj[key]);
+        obj[key] = masked;
+        if (last4) obj.cardLast4 = last4;
+      } else {
+        redactRecursive(obj[key]);
+      }
+    }
+  };
 
+  redactRecursive(out);
   return out;
 }

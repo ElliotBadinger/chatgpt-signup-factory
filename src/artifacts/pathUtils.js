@@ -8,9 +8,7 @@ import path from 'node:path';
  * - If filePath is already under artifactDir -> returns filePath unchanged
  */
 export function resolveArtifactPath(artifactDir, filePath) {
-  if (!artifactDir) return filePath;
-  if (!filePath) return filePath;
-
+  if (!artifactDir || !filePath) return filePath;
   if (path.isAbsolute(filePath)) return filePath;
 
   const normDir = path.normalize(artifactDir);
@@ -20,7 +18,9 @@ export function resolveArtifactPath(artifactDir, filePath) {
     return filePath;
   }
 
-  const joined = path.join(artifactDir, filePath);
-  // Ensure we don't return anything with ..
-  return joined.replace(/\.\./g, '__'); 
+  // First, normalize to remove any weirdness
+  const safeFile = filePath.replace(/\.\./g, '__');
+  const joined = path.join(artifactDir, safeFile);
+
+  return joined;
 }
