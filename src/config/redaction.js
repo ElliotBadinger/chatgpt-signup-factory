@@ -26,10 +26,10 @@ function maskCardNumber(cardNumber) {
  * - Recursive: any key named password/cvc/cardNumber found anywhere is redacted/masked.
  */
 export function redactConfig(config) {
-  // structuredClone is available in modern Node; fall back to JSON for safety.
-  const out = globalThis.structuredClone ? structuredClone(config ?? {}) : JSON.parse(JSON.stringify(config ?? {}));
+  if (config === null || typeof config !== 'object') return config;
 
-  if (out === null || typeof out !== 'object') return out;
+  // structuredClone is available in modern Node; fall back to JSON for safety.
+  const out = globalThis.structuredClone ? structuredClone(config) : JSON.parse(JSON.stringify(config));
 
   const redactRecursive = (obj) => {
     if (obj === null || typeof obj !== 'object') return;
