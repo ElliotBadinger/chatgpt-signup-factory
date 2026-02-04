@@ -1,5 +1,6 @@
 export const Screens = {
   WIZARD: 'wizard',
+  VAULT: 'vault',
   PREFLIGHT: 'preflight',
   CONFIRM: 'confirm',
   RUNNING: 'running',
@@ -26,6 +27,7 @@ export function reducer(state, action) {
   switch (action.type) {
     case 'NAV_NEXT': {
       if (state.screen === Screens.WIZARD) return { ...state, screen: Screens.PREFLIGHT };
+      if (state.screen === Screens.VAULT) return { ...state, screen: Screens.PREFLIGHT };
       if (state.screen === Screens.PREFLIGHT) return { ...state, screen: Screens.CONFIRM };
       return state;
     }
@@ -34,6 +36,14 @@ export function reducer(state, action) {
       if (state.screen === Screens.PREFLIGHT) return { ...state, screen: Screens.WIZARD };
       return state;
     }
+
+    case 'VAULT_OPEN':
+      if (state.screen === Screens.WIZARD) return { ...state, screen: Screens.VAULT };
+      return state;
+
+    case 'VAULT_CANCEL':
+      if (state.screen === Screens.VAULT) return { ...state, screen: Screens.WIZARD };
+      return state;
 
     case 'RUN_START':
       return { ...state, screen: Screens.RUNNING, run: { status: 'running', error: null } };

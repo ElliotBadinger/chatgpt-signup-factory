@@ -11,6 +11,8 @@ describe('TuiStateMachine Property Tests', () => {
       fc.constant({ type: 'RUN_FAILURE', error: 'error' }),
       fc.constant({ type: 'CHECKPOINT_REQUEST', checkpointType: 'test' }),
       fc.constant({ type: 'CHECKPOINT_RESOLVE', approved: true }),
+      fc.constant({ type: 'VAULT_OPEN' }),
+      fc.constant({ type: 'VAULT_CANCEL' }),
     ];
 
     fc.assert(

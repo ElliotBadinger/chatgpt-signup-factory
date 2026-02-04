@@ -84,4 +84,23 @@ describe('TUI state machine', () => {
     expect(s.checkpoint.pending).toBe(false);
     expect(s.checkpoint.lastDecision).toBe(true);
   });
+
+  test('vault screen navigation', () => {
+    let s = createInitialState();
+    expect(s.screen).toBe(Screens.WIZARD);
+
+    // Open vault prompts
+    s = reducer(s, { type: 'VAULT_OPEN' });
+    expect(s.screen).toBe(Screens.VAULT);
+
+    // Cancel from vault returns to wizard
+    s = reducer(s, { type: 'VAULT_CANCEL' });
+    expect(s.screen).toBe(Screens.WIZARD);
+
+    // Unlock/Create success (simulated by NAV_NEXT from VAULT)
+    s = reducer(s, { type: 'VAULT_OPEN' });
+    expect(s.screen).toBe(Screens.VAULT);
+    s = reducer(s, { type: 'NAV_NEXT' });
+    expect(s.screen).toBe(Screens.PREFLIGHT);
+  });
 });
