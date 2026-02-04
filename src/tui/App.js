@@ -150,6 +150,7 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
         passcode,
         pendingPasscode: null,
         error: null,
+        mode: 'unlock',
       }));
       dispatch({ type: 'NAV_NEXT' });
     }
