@@ -8,9 +8,15 @@
 
 ## Run the TUI
 
+### Using npm
 ```bash
-cd /home/epistemophile/chatgpt-factory-bundle/.worktrees/phase01-e2e-trial
 npm run tui
+```
+
+### Using signupx CLI
+```bash
+signupx tui --config config.yaml
+signupx run --config config.yaml
 ```
 
 ## UX Flow
