@@ -7,13 +7,24 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "tui": "node src/tui/entrypoint.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "dependencies": {
+    "ink": "^4.4.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "react": "^18.2.0",
+    "yaml": "^2.8.2",
+    "zod": "^4.3.6"
+  },
   "devDependencies": {
+    "fast-check": "^4.5.3",
+    "ink-testing-library": "^3.0.0",
     "jest": "^30.2.0",
     "node-fetch": "^3.3.2"
   }
