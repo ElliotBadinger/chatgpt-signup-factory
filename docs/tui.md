@@ -63,3 +63,18 @@ signupx run --config config.yaml    # Headless mode
 
 - To load a YAML config, create `config.yaml` in the repo root and press `[l]` in the Wizard.
 - Secrets are never displayed in cleartext; the preview is always redacted.
+
+## Encrypted Vault
+
+If `safety.persistSecrets: true` is set in the config:
+
+- **Location**: `~/.account-factory/account.enc.json`
+- **Behavior**:
+  - Before preflight, you will be prompted to create or unlock the vault.
+  - **Unlock**: Enter your passcode to prefill identity (email/password) and billing details.
+  - **Create**: Set a passcode to encrypt successful run data.
+- **Persistence**: Upon a successful run, the account and billing data used are encrypted and saved to the vault.
+- **Security**:
+  - Uses AES-256-GCM.
+  - Passcode is never stored.
+  - Failed unlock attempts are safe (no data loaded).
