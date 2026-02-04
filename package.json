@@ -2,6 +2,9 @@
   "name": "chatgpt-factory",
   "version": "1.0.0",
   "type": "module",
+  "bin": {
+    "signupx": "src/cli/signupx.js"
+  },
   "main": "src/index.js",
   "directories": {
     "test": "tests"
@@ -15,6 +18,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "commander": "^11.1.0",
     "ink": "^4.4.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
