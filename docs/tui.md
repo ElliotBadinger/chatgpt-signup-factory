@@ -16,7 +16,7 @@ npm run tui
 ### Using signupx CLI
 ```bash
 signupx tui --config config.yaml
-signupx run --config config.yaml
+signupx run --config config.yaml    # Headless mode
 ```
 
 ## UX Flow
