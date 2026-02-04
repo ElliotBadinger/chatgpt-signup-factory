@@ -22,6 +22,7 @@ export function ResultsScreen({ runMeta }) {
     ) : null,
     h(Text, null, `Run ID:   ${runMeta.runId || 'N/A'}`),
     h(Text, null, `Location: ${runMeta.runDir || 'N/A'}`),
+    h(Text, null, `Bundle:   ${runMeta.runDir ? `${runMeta.runDir}/run.bundle.json` : 'N/A'}`),
     h(Text, null, ' '),
     h(Text, { dimColor: true }, 'Press [q] to exit')
   );

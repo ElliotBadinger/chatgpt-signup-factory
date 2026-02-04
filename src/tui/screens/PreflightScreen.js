@@ -25,9 +25,10 @@ export function PreflightScreen({ preflight, onBack, onNext }) {
       Box,
       { flexDirection: 'column', marginBottom: 1 },
       ...checks.map((c, i) => h(
-        Text,
-        { key: i, color: c.ok ? 'green' : 'red' },
-        `${c.ok ? '✓' : '✗'} ${c.name}${c.message ? `: ${c.message}` : ''}`
+        Box,
+        { key: i, flexDirection: 'column', marginBottom: 1 },
+        h(Text, { color: c.ok ? 'green' : 'red' }, `${c.ok ? '✓' : '✗'} ${c.id}: ${c.message}`),
+        !c.ok && c.fixHint && h(Text, { dimColor: true }, `   Hint: ${c.fixHint}`)
       ))
     ),
     h(Text, null, ' '),

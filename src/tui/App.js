@@ -8,7 +8,8 @@ import { RunOrchestrator } from '../orchestrator/RunOrchestrator.js';
 import { Events } from '../orchestrator/events.js';
 import { AgentMailProvider } from '../AgentMailProvider.js';
 import { EmailProvisioner } from '../EmailProvisioner.js';
-import { PreflightResult } from '../models/PreflightResult.js';
+import { runPreflight } from './preflight.js';
+import { RunLogger } from './runLogger.js';
 
 import { createInitialState, reducer, Screens } from './stateMachine.js';
 import { WizardScreen } from './screens/WizardScreen.js';
@@ -47,15 +48,8 @@ export default function App() {
   );
 
   const preflight = useMemo(() => {
-    const res = new PreflightResult();
-    res.addCheck('Environment', true);
-    if (!process.env.AGENTMAIL_API_KEY) {
-      res.addCheck('AgentMail API Key', false, 'Missing AGENTMAIL_API_KEY in .env');
-    } else {
-      res.addCheck('AgentMail API Key', true);
-    }
-    return res;
-  }, []);
+    return runPreflight({ env: process.env, artifactsDir: config.artifacts?.outputDir });
+  }, [config.artifacts?.outputDir]);
 
   const handleLoadYaml = () => {
     try {
@@ -81,12 +75,16 @@ export default function App() {
     setArtifacts([]);
 
     const artifactManager = new ArtifactManager({ baseDir: config.artifacts.outputDir, config });
+    const logger = new RunLogger({ artifactManager });
     setRunMeta((prev) => ({ ...prev, runId: artifactManager.getRunId(), runDir: artifactManager.getRunDir() }));
     artifactManager.updateManifest({ status: 'running' });
 
     const checkpointProvider = {
-      approve: async () => {
-        setCheckpointPending(true);
+      approve: async (checkpoint) => {
+        setCheckpointPending({
+          ...checkpoint,
+          runDir: artifactManager.getRunDir()
+        });
         return await new Promise((resolve) => {
           checkpointResolveRef.current = (approved) => {
             setCheckpointPending(false);
@@ -99,12 +97,18 @@ export default function App() {
     const orchestrator = new RunOrchestrator({
       agentMailApiKey: process.env.AGENTMAIL_API_KEY,
       checkpointProvider,
+      artifactManager,
+      logger,
     });
 
     const pushEvent = (ev) => {
       setTimeline((tl) => [...tl, { ts: Date.now(), ...ev }].slice(-200));
       if (ev.type === Events.ARTIFACT_WRITTEN) {
-        setArtifacts(a => [...a, ev.path]);
+        const runDir = artifactManager.getRunDir();
+        const relPath = ev.path.startsWith(runDir) 
+          ? ev.path.slice(runDir.length).replace(/^[/\\]+/, '') 
+          : ev.path;
+        setArtifacts(a => [...a, relPath]);
       }
     };
 
@@ -112,6 +116,7 @@ export default function App() {
     orchestrator.on(Events.STATE_CHANGE, pushEvent);
     orchestrator.on(Events.ARTIFACT_WRITTEN, pushEvent);
     orchestrator.on(Events.CHECKPOINT_BEFORE_SUBSCRIBE, pushEvent);
+    orchestrator.on(Events.LOG_LINE, pushEvent);
     orchestrator.on(Events.RUN_SUCCESS, pushEvent);
     orchestrator.on(Events.RUN_FAILURE, pushEvent);
 

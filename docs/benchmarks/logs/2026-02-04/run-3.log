@@ -1,0 +1,720 @@
+Browser config: headless=true stealth=true timezone=America/Los_Angeles lang=en-US,en
+--- SIGNUP FACTORY START ---
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [navigate_page] calling with {"url":"https://chatgpt.com/"}
+>> [navigate_page] response: # navigate_page response
+Successfully navigated to...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [navigate_page] calling with {"url":"https://chatgpt.com/auth/login"}
+>> [navigate_page] response: # navigate_page response
+Successfully navigated to...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+Detected state LANDING. Continuing flow.
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_1_preparse_2026-02-04T09-33-49-039Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 1] State: LANDING
+Clicking uid=5_15 button "Log in" on landing...
+>> [click] calling with {"uid":"5_15","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_2_preparse_2026-02-04T09-34-05-384Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 2] State: LOGIN_EMAIL
+>> [click] calling with {"uid":"12_53","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"12_53","value":"nervouscell240@agentmail.to","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"12_59","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_3_preparse_2026-02-04T09-34-07-736Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 3] State: LOGIN_PASSWORD
+>> [click] calling with {"uid":"20_36","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"20_36","value":"AutomationTest123!","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"20_46","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_4_preparse_2026-02-04T09-34-09-941Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 4] State: LOGIN_PASSWORD
+Password input is disabled, waiting...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_5_preparse_2026-02-04T09-34-10-989Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 5] State: LOGIN_PASSWORD
+Password input is disabled, waiting...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_6_preparse_2026-02-04T09-34-16-715Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 6] State: OTP_VERIFICATION
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"30_22","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"30_22","value":"091510","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [press_key] calling with {"key":"Enter"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Ent...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_7_preparse_2026-02-04T09-34-19-511Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 7] State: ABOUT_YOU
+Handling ABOUT_YOU...
+>> [click] calling with {"uid":"37_23","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"37_23","value":"Agent User","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"37_37","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"37_37","value":"01","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"37_35","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"37_35","value":"01","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"37_39","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"37_39","value":"1990","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"37_52","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_8_preparse_2026-02-04T09-34-33-724Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 8] State: ONBOARDING
+>> [click] calling with {"uid":"65_35","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"67_22","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"70_15","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_9_preparse_2026-02-04T09-34-38-763Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 9] State: ONBOARDING
+>> [click] calling with {"uid":"73_186","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_10_preparse_2026-02-04T09-34-40-171Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 10] State: CHAT_INTERFACE
+Reached ChatGPT. Verifying logged-in state (passive)...
+Verifying chat interface is present (passive mode)...
+--- VERIFICATION SUCCESS: Chat interface indicators found ---
+>> [click] calling with {"uid":"77_120","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"80_240","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"step_11_preparse_2026-02-04T09-34-42-404Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+[Step 11] State: BUSINESS_TRIAL_PLAN_PICKER
+>> [click] calling with {"uid":"82_233","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"82_233","value":"5","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"82_276","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+Detected checkout page after plan picker. Completing checkout form...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_start_2026-02-04T09-34-50-676Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [take_screenshot] calling with {"filePath":"ambiguous_checkout_unready_initial_2026-02-04T09-34-50-742Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [take_screenshot] calling with {"filePath":"debug_screenshot.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [click] calling with {"uid":"102_64","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"102_64","value":"nervouscell240@agentmail.to","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_email_2026-02-04T09-34-57-648Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+Detected inline checkout fields. Filling card + billing via snapshot UIDs...
+>> [click] calling with {"uid":"102_86","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"102_86","value":"4242424242424242","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_card_number_2026-02-04T09-35-00-528Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [click] calling with {"uid":"102_107","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"102_107","value":"1234","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_card_exp_2026-02-04T09-35-01-691Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [click] calling with {"uid":"102_114","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"102_114","value":"123","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_card_cvc_2026-02-04T09-35-02-701Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [click] calling with {"uid":"102_138","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"102_138","value":"Agent User","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_cardholder_2026-02-04T09-35-03-967Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [click] calling with {"uid":"102_429","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_enter_address_manually_2026-02-04T09-35-04-329Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [click] calling with {"uid":"129_208","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"129_208","value":"123 Market St","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_address1_2026-02-04T09-35-05-801Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [click] calling with {"uid":"129_229","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"129_229","value":"Cape Town","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_city_2026-02-04T09-35-07-053Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [click] calling with {"uid":"129_236","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [fill] calling with {"uid":"129_236","value":"8001","failOnError":true}
+>> [fill] response: # fill response
+Successfully filled out the elemen...
+>> [press_key] calling with {"key":"Tab"}
+>> [press_key] response: # press_key response
+Successfully pressed key: Tab...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_postal_2026-02-04T09-35-08-118Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_form_filled_2026-02-04T09-35-08-219Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [click] calling with {"uid":"102_478","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_after_terms_2026-02-04T09-35-08-603Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+>> [click] calling with {"uid":"102_489","failOnError":true}
+>> [click] response: # click response
+Successfully clicked on the eleme...
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+Checkout progress check: Still on checkout with active Subscribe button
+Checkout network response detected: 200 https://api.stripe.com/v1/payment_pages/cs_live_a1GXyeH041UhLYW4s8O3KgW2EFSZ1K5AuZuuenH2Td2yWFYduZASYB6RDW
+>> [take_snapshot] calling with {"verbose":true}
+>> [take_snapshot] response: # take_snapshot response
+## Latest page snapshot
+u...
+>> [take_screenshot] calling with {"filePath":"checkout_subscribe_network_response_2026-02-04T09-35-09-396Z.png"}
+>> [take_screenshot] response: # take_screenshot response
+Took a screenshot of th...
+SUCCESS: ChatGPT account provisioned and ready.

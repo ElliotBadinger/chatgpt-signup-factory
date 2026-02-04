@@ -26,10 +26,15 @@ async function main() {
             agentMailInbox = provisioned.inboxId;
         }
 
+        const headlessEnv = String(process.env.HEADLESS || '').toLowerCase();
+        const headless = headlessEnv === 'true' || headlessEnv === '1';
+
         const factory = new SignupFactory(API_KEY, {
             email,
             agentMailInbox,
-            runConfig
+            runConfig,
+            headless,
+            userDataDir: process.env.USER_DATA_DIR || undefined,
         });
 
         try {

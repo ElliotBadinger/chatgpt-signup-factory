@@ -6,26 +6,51 @@ import { PreflightScreen } from '../src/tui/screens/PreflightScreen.js';
 import { ConfirmScreen } from '../src/tui/screens/ConfirmScreen.js';
 import { RunningScreen } from '../src/tui/screens/RunningScreen.js';
 import { ResultsScreen } from '../src/tui/screens/ResultsScreen.js';
-import { PreflightResult } from '../src/models/PreflightResult.js';
+import { Events } from '../src/orchestrator/events.js';
 
 describe('TUI Screens UX', () => {
   describe('WizardScreen', () => {
-    it('renders and handles YAML load/save labels', () => {
-      const config = { run: { headless: true }, identity: {} };
+    it('renders all required sections and redacted preview', () => {
+      const config = { 
+        run: { headless: true, maxRunMs: 60000, stepTimeoutMs: 30000 }, 
+        identity: { password: 'secret-password' },
+        plan: { tier: 'plus' },
+        billing: { method: 'card' },
+        safety: { enabled: true },
+        artifacts: { outputDir: './runs' }
+      };
       const { lastFrame } = render(React.createElement(WizardScreen, { config }));
+      
       expect(lastFrame()).toContain('Config Wizard');
+      expect(lastFrame()).toContain('Run/Execution');
+      expect(lastFrame()).toContain('Identity');
+      expect(lastFrame()).toContain('Plan');
+      expect(lastFrame()).toContain('Billing');
+      expect(lastFrame()).toContain('Safety');
+      expect(lastFrame()).toContain('Artifacts');
+      
+      // Redacted preview
+      expect(lastFrame()).toContain('PREVIEW (REDACTED)');
+      expect(lastFrame()).toContain('[REDACTED]');
+      expect(lastFrame()).not.toContain('secret-password');
+
       expect(lastFrame()).toContain('[l] Load YAML');
       expect(lastFrame()).toContain('[s] Save YAML');
     });
   });
 
   describe('PreflightScreen', () => {
-    it('renders check results', () => {
-      const preflight = new PreflightResult();
-      preflight.addCheck('API Key', false, 'Missing');
+    it('renders check results using structured PreflightResult', () => {
+      const preflight = {
+        ok: false,
+        checks: [
+          { id: 'env.test', ok: false, message: 'Check Failed', fixHint: 'Try fixing it' }
+        ]
+      };
       const { lastFrame } = render(React.createElement(PreflightScreen, { preflight }));
       expect(lastFrame()).toContain('Preflight Checklist');
-      expect(lastFrame()).toContain('API Key: Missing');
+      expect(lastFrame()).toContain('env.test: Check Failed');
+      expect(lastFrame()).toContain('Hint: Try fixing it');
     });
   });
 
@@ -39,17 +64,29 @@ describe('TUI Screens UX', () => {
   });
 
   describe('RunningScreen', () => {
-    it('shows timeline entries and artifact list', () => {
-      const timeline = [{ ts: Date.now(), type: 'STEP', state: 'login' }];
-      const runMeta = { runId: 'run-123', runDir: '/tmp/run-123' };
+    it('shows failure summary and checkpoint details', () => {
+      const timeline = [{ ts: Date.now(), type: Events.STATE_CHANGE, state: 'login' }];
+      const runMeta = { 
+        status: 'failure', 
+        runId: 'run-123', 
+        runDir: '/tmp/run-123',
+        error: 'Login failed' 
+      };
       const { lastFrame } = render(React.createElement(RunningScreen, { 
         timeline, 
         runMeta,
-        artifacts: ['shot1.png', 'trace.json'] 
+        artifacts: ['shot1.png'],
+        checkpointPending: { message: 'what will happen', runDir: '/tmp/run-123' }
       }));
-      expect(lastFrame()).toContain('Running');
-      expect(lastFrame()).toContain('STEP [login]');
-      expect(lastFrame()).toContain('shot1.png');
+      
+      expect(lastFrame()).toContain('FAILURE SUMMARY');
+      expect(lastFrame()).toContain('State: login');
+      expect(lastFrame()).toContain('Login failed');
+      
+      expect(lastFrame()).toContain('CHECKPOINT REQUIRED');
+      expect(lastFrame()).toContain('what will happen');
+      expect(lastFrame()).toContain('/tmp/run-123');
+      expect(lastFrame()).toContain('Latest Screenshot: shot1.png');
     });
   });
 

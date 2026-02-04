@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { Header } from '../components/Header.js';
 import { ArtifactList } from '../components/ArtifactList.js';
+import { Events } from '../../orchestrator/events.js';
 
 const h = React.createElement;
 
@@ -26,13 +27,23 @@ export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpoi
   );
 
   const filteredTimeline = useMemo(() => {
-    if (logLevel === 'info') return timeline;
-    if (logLevel === 'warn') return timeline.filter(ev => ev.level === 'warn' || ev.level === 'error');
-    if (logLevel === 'error') return timeline.filter(ev => ev.level === 'error');
-    return timeline;
+    return (timeline || []).filter(ev => {
+      if (ev.type !== Events.LOG_LINE) return true;
+      if (logLevel === 'info') return true;
+      if (logLevel === 'warn') return ev.level === 'warn' || ev.level === 'error';
+      if (logLevel === 'error') return ev.level === 'error';
+      return true;
+    });
   }, [timeline, logLevel]);
 
   const lastEvents = useMemo(() => (filteredTimeline || []).slice(-10), [filteredTimeline]);
+
+  const failureContext = useMemo(() => {
+    if (runMeta.status !== 'failure') return null;
+    const lastState = [...timeline].reverse().find(ev => ev.type === Events.STATE_CHANGE)?.state || 'unknown';
+    const lastSnapshot = artifacts.filter(a => a.endsWith('.txt') || a.endsWith('.png')).slice(-2);
+    return { lastState, lastSnapshot };
+  }, [runMeta.status, timeline, artifacts]);
 
   return h(
     Box,
@@ -46,9 +57,14 @@ export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpoi
     checkpointPending && h(
       Box,
       { flexDirection: 'column', borderStyle: 'double', borderColor: 'yellow', paddingX: 1, marginBottom: 1 },
-      h(Text, { color: 'yellow', bold: true }, '⚠ Checkpoint Required'),
+      h(Text, { color: 'yellow', bold: true }, '⚠ CHECKPOINT REQUIRED'),
       h(Text, null, 'The agent is requesting permission to proceed.'),
-      h(Text, { dimColor: true }, 'Press [y] approve, [n] reject')
+      h(Text, null, `Plan: ${checkpointPending.message || 'what will happen'}`),
+      h(Box, { flexDirection: 'column', marginTop: 1 },
+        h(Text, { dimColor: true }, `Run Dir: ${checkpointPending.runDir}`),
+        h(Text, { dimColor: true }, `Latest Screenshot: ${artifacts.filter(a => a.endsWith('.png')).pop() || 'none'}`)
+      ),
+      h(Text, { bold: true, marginTop: 1 }, 'Press [y] approve, [n] reject')
     ),
 
     h(Box, { flexGrow: 1, flexDirection: 'row' },
@@ -60,7 +76,9 @@ export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpoi
             : lastEvents.map((ev, idx) =>
                 h(Text, { key: idx, wrap: 'truncate-end' }, 
                   h(Text, { color: 'gray' }, `${new Date(ev.ts || 0).toLocaleTimeString()} `),
-                  `${ev.type}${ev.state ? ` [${ev.state}]` : ''}`
+                  ev.type === Events.LOG_LINE 
+                    ? h(Text, { color: ev.level === 'error' ? 'red' : ev.level === 'warn' ? 'yellow' : undefined }, `[${ev.level || 'info'}] ${ev.message}`)
+                    : `${ev.type}${ev.state ? ` [${ev.state}]` : ''}`
                 )
               )
         )
@@ -76,8 +94,15 @@ export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpoi
     runMeta.status === 'failure' && h(
       Box,
       { flexDirection: 'column', borderStyle: 'single', borderColor: 'red', paddingX: 1, marginTop: 1 },
-      h(Text, { color: 'red', bold: true }, 'Failure Summary'),
-      h(Text, null, runMeta.error || 'Unknown error')
+      h(Text, { color: 'red', bold: true }, 'FAILURE SUMMARY'),
+      h(Text, null, `State: ${failureContext?.lastState}`),
+      h(Text, null, `Error: ${runMeta.error || 'Unknown error'}`),
+      failureContext?.lastSnapshot?.length > 0 && h(
+        Box,
+        { flexDirection: 'column', marginTop: 1 },
+        h(Text, { dimColor: true }, 'Last Snapshots:'),
+        ...failureContext.lastSnapshot.map(s => h(Text, { key: s, dimColor: true }, ` - ${s}`))
+      )
     ),
 
     h(Box, { marginTop: 1, flexDirection: 'row' },
