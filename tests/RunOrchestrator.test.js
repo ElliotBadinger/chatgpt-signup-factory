@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+import { EventEmitter } from 'events';
 import { RunOrchestrator } from '../src/orchestrator/RunOrchestrator.js';
 import { Events } from '../src/orchestrator/events.js';
 
@@ -91,5 +93,38 @@ describe('RunOrchestrator', () => {
 
         await expect(orchestrator.run()).rejects.toThrow('CHECKPOINT_REJECTED');
         expect(failureEvents).toContainEqual(expect.objectContaining({ type: Events.RUN_FAILURE, reason: 'CHECKPOINT_REJECTED' }));
+    });
+
+    it('should listen to logger and emit log events', async () => {
+        const logEvents = [];
+        const mockLogger = new EventEmitter();
+        const orchestrator = new RunOrchestrator({
+            factoryClass: FakeSignupFactory,
+            logger: mockLogger
+        });
+
+        orchestrator.on(Events.LOG_LINE, (ev) => logEvents.push(ev));
+
+        const testLog = { message: 'test log', timestamp: new Date().toISOString() };
+        mockLogger.emit('log', testLog);
+
+        expect(logEvents).toContainEqual(testLog);
+    });
+
+    it('should call artifactManager.handleEvent for all events', async () => {
+        const mockArtifactManager = {
+            handleEvent: jest.fn()
+        };
+        const orchestrator = new RunOrchestrator({
+            factoryClass: FakeSignupFactory,
+            artifactManager: mockArtifactManager
+        });
+
+        await orchestrator.run();
+
+        // RUN_START, STATE_CHANGE, RUN_SUCCESS are emitted by FakeSignupFactory.run()
+        expect(mockArtifactManager.handleEvent).toHaveBeenCalledWith(expect.objectContaining({ type: Events.RUN_START }));
+        expect(mockArtifactManager.handleEvent).toHaveBeenCalledWith(expect.objectContaining({ type: Events.STATE_CHANGE }));
+        expect(mockArtifactManager.handleEvent).toHaveBeenCalledWith(expect.objectContaining({ type: Events.RUN_SUCCESS }));
     });
 });
