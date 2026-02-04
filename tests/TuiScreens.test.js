@@ -64,29 +64,48 @@ describe('TUI Screens UX', () => {
   });
 
   describe('RunningScreen', () => {
-    it('shows failure summary and checkpoint details', () => {
-      const timeline = [{ ts: Date.now(), type: Events.STATE_CHANGE, state: 'login' }];
+    it('shows failure summary and checkpoint details with artifacts and snapshots', () => {
+      const timeline = [
+        { ts: Date.now(), type: Events.STATE_CHANGE, state: 'login' },
+        { ts: Date.now(), type: Events.LOG_LINE, level: 'info', message: 'Starting login' },
+        { ts: Date.now(), type: Events.LOG_LINE, level: 'error', message: 'Failed to find button' }
+      ];
       const runMeta = { 
         status: 'failure', 
         runId: 'run-123', 
         runDir: '/tmp/run-123',
         error: 'Login failed' 
       };
+      const artifacts = ['shot1.png', 'snap1.txt'];
+      const checkpointPending = { 
+        message: 'what will happen', 
+        runDir: '/tmp/run-123' 
+      };
+      const failureSnapshotExcerpt = 'Sample snapshot content with redacted secret';
+      
       const { lastFrame } = render(React.createElement(RunningScreen, { 
         timeline, 
         runMeta,
-        artifacts: ['shot1.png'],
-        checkpointPending: { message: 'what will happen', runDir: '/tmp/run-123' }
+        artifacts,
+        checkpointPending,
+        failureSnapshotExcerpt
       }));
       
       expect(lastFrame()).toContain('FAILURE SUMMARY');
       expect(lastFrame()).toContain('State: login');
       expect(lastFrame()).toContain('Login failed');
+      expect(lastFrame()).toContain('Sample snapshot content with redacted secret');
+      expect(lastFrame()).toContain('snap1.txt');
       
       expect(lastFrame()).toContain('CHECKPOINT REQUIRED');
       expect(lastFrame()).toContain('what will happen');
       expect(lastFrame()).toContain('/tmp/run-123');
+      expect(lastFrame()).toContain('Latest Snapshot: snap1.txt');
       expect(lastFrame()).toContain('Latest Screenshot: shot1.png');
+
+      // Log pane (separate from timeline)
+      expect(lastFrame()).toContain('Logs (info)');
+      expect(lastFrame()).toContain('Failed to find button');
     });
   });
 

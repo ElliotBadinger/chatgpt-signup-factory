@@ -6,7 +6,7 @@ import { Events } from '../../orchestrator/events.js';
 
 const h = React.createElement;
 
-export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpointDecision, artifacts = [], isActive: isActiveProp }) {
+export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpointDecision, artifacts = [], isActive: isActiveProp, failureSnapshotExcerpt }) {
   const isActive = isActiveProp ?? Boolean(process.stdin && process.stdin.isTTY);
   const [logLevel, setLogLevel] = useState('info'); // info, warn, error
 
@@ -26,17 +26,19 @@ export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpoi
     { isActive }
   );
 
-  const filteredTimeline = useMemo(() => {
+  const timelineEvents = useMemo(() => {
+    return (timeline || []).filter(ev => ev.type !== Events.LOG_LINE).slice(-10);
+  }, [timeline]);
+
+  const logEvents = useMemo(() => {
     return (timeline || []).filter(ev => {
-      if (ev.type !== Events.LOG_LINE) return true;
+      if (ev.type !== Events.LOG_LINE) return false;
       if (logLevel === 'info') return true;
       if (logLevel === 'warn') return ev.level === 'warn' || ev.level === 'error';
       if (logLevel === 'error') return ev.level === 'error';
       return true;
-    });
+    }).slice(-10);
   }, [timeline, logLevel]);
-
-  const lastEvents = useMemo(() => (filteredTimeline || []).slice(-10), [filteredTimeline]);
 
   const failureContext = useMemo(() => {
     if (runMeta.status !== 'failure') return null;
@@ -62,6 +64,7 @@ export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpoi
       h(Text, null, `Plan: ${checkpointPending.message || 'what will happen'}`),
       h(Box, { flexDirection: 'column', marginTop: 1 },
         h(Text, { dimColor: true }, `Run Dir: ${checkpointPending.runDir}`),
+        h(Text, { dimColor: true }, `Latest Snapshot: ${artifacts.filter(a => a.endsWith('.txt')).pop() || 'none'}`),
         h(Text, { dimColor: true }, `Latest Screenshot: ${artifacts.filter(a => a.endsWith('.png')).pop() || 'none'}`)
       ),
       h(Text, { bold: true, marginTop: 1 }, 'Press [y] approve, [n] reject')
@@ -70,15 +73,24 @@ export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpoi
     h(Box, { flexGrow: 1, flexDirection: 'row' },
       h(Box, { flexDirection: 'column', width: '60%', marginRight: 2 },
         h(Text, { bold: true, underline: true }, 'Timeline'),
-        h(Box, { flexDirection: 'column', marginY: 1 },
-          lastEvents.length === 0
+        h(Box, { flexDirection: 'column', marginY: 1, minHeight: 5 },
+          timelineEvents.length === 0
             ? h(Text, { dimColor: true }, '(no events)')
-            : lastEvents.map((ev, idx) =>
+            : timelineEvents.map((ev, idx) =>
                 h(Text, { key: idx, wrap: 'truncate-end' }, 
                   h(Text, { color: 'gray' }, `${new Date(ev.ts || 0).toLocaleTimeString()} `),
-                  ev.type === Events.LOG_LINE 
-                    ? h(Text, { color: ev.level === 'error' ? 'red' : ev.level === 'warn' ? 'yellow' : undefined }, `[${ev.level || 'info'}] ${ev.message}`)
-                    : `${ev.type}${ev.state ? ` [${ev.state}]` : ''}`
+                  `${ev.type}${ev.state ? ` [${ev.state}]` : ''}`
+                )
+              )
+        ),
+        h(Text, { bold: true, underline: true }, `Logs (${logLevel})`),
+        h(Box, { flexDirection: 'column', marginTop: 1 },
+          logEvents.length === 0
+            ? h(Text, { dimColor: true }, '(no logs)')
+            : logEvents.map((ev, idx) =>
+                h(Text, { key: idx, wrap: 'truncate-end' }, 
+                  h(Text, { color: 'gray' }, `${new Date(ev.ts || 0).toLocaleTimeString()} `),
+                  h(Text, { color: ev.level === 'error' ? 'red' : ev.level === 'warn' ? 'yellow' : undefined }, `[${ev.level || 'info'}] ${ev.message}`)
                 )
               )
         )
@@ -97,6 +109,11 @@ export function RunningScreen({ timeline, runMeta, checkpointPending, onCheckpoi
       h(Text, { color: 'red', bold: true }, 'FAILURE SUMMARY'),
       h(Text, null, `State: ${failureContext?.lastState}`),
       h(Text, null, `Error: ${runMeta.error || 'Unknown error'}`),
+      failureSnapshotExcerpt && h(
+        Box, 
+        { marginTop: 1, paddingX: 1, borderStyle: 'classic', borderColor: 'gray' },
+        h(Text, { dimColor: true }, failureSnapshotExcerpt)
+      ),
       failureContext?.lastSnapshot?.length > 0 && h(
         Box,
         { flexDirection: 'column', marginTop: 1 },

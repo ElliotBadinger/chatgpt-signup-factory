@@ -1,3 +1,4 @@
+import fs from 'fs';
 import React, { useMemo, useReducer, useRef, useState } from 'react';
 import { useApp, useInput } from 'ink';
 
@@ -27,6 +28,7 @@ export default function App() {
   const [config, setConfig] = useState(() => validateConfig({}));
   const [timeline, setTimeline] = useState([]);
   const [artifacts, setArtifacts] = useState([]);
+  const [failureSnapshotExcerpt, setFailureSnapshotExcerpt] = useState(null);
   const [runMeta, setRunMeta] = useState({ status: 'idle', runId: null, runDir: null, error: null });
 
   // Checkpoint (before subscribe) approval bridge
@@ -73,6 +75,7 @@ export default function App() {
     setRunMeta({ status: 'running', runId: null, runDir: null, error: null });
     setTimeline([]);
     setArtifacts([]);
+    setFailureSnapshotExcerpt(null);
 
     const artifactManager = new ArtifactManager({ baseDir: config.artifacts.outputDir, config });
     const logger = new RunLogger({ artifactManager });
@@ -109,6 +112,16 @@ export default function App() {
           ? ev.path.slice(runDir.length).replace(/^[/\\]+/, '') 
           : ev.path;
         setArtifacts(a => [...a, relPath]);
+
+        if (ev.path.endsWith('.txt')) {
+          try {
+            const content = fs.readFileSync(ev.path, 'utf8');
+            const excerpt = content.slice(0, 200).replace(/[\r\n]+/g, ' ').trim();
+            setFailureSnapshotExcerpt(excerpt);
+          } catch (e) {
+            // ignore read errors
+          }
+        }
       }
     };
 
@@ -201,6 +214,7 @@ export default function App() {
       checkpointPending,
       onCheckpointDecision: approveCheckpoint,
       artifacts,
+      failureSnapshotExcerpt,
     });
   }
 
