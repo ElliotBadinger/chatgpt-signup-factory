@@ -19,6 +19,23 @@ describe('TUI state machine', () => {
     expect(s.run.status).toBe('success');
   });
 
+  test('vault screen flow', () => {
+    let s = createInitialState();
+    expect(s.screen).toBe(Screens.WIZARD);
+
+    s = reducer(s, { type: 'VAULT_OPEN' });
+    expect(s.screen).toBe(Screens.VAULT);
+
+    s = reducer(s, { type: 'NAV_NEXT' });
+    expect(s.screen).toBe(Screens.PREFLIGHT);
+
+    s = reducer(s, { type: 'NAV_BACK' });
+    expect(s.screen).toBe(Screens.VAULT);
+
+    s = reducer(s, { type: 'VAULT_CANCEL' });
+    expect(s.screen).toBe(Screens.WIZARD);
+  });
+
   test('screen transitions beyond boundaries', () => {
     let s = createInitialState();
     // At WIZARD, NAV_BACK should do nothing

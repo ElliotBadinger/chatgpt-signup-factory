@@ -20,6 +20,9 @@ export function createInitialState() {
       type: null,
       lastDecision: null,
     },
+    vault: {
+      active: false,
+    },
   };
 }
 
@@ -33,16 +36,22 @@ export function reducer(state, action) {
     }
     case 'NAV_BACK': {
       if (state.screen === Screens.CONFIRM) return { ...state, screen: Screens.PREFLIGHT };
-      if (state.screen === Screens.PREFLIGHT) return { ...state, screen: Screens.WIZARD };
+      if (state.screen === Screens.PREFLIGHT) {
+        return { ...state, screen: state.vault?.active ? Screens.VAULT : Screens.WIZARD };
+      }
       return state;
     }
 
     case 'VAULT_OPEN':
-      if (state.screen === Screens.WIZARD) return { ...state, screen: Screens.VAULT };
+      if (state.screen === Screens.WIZARD) {
+        return { ...state, screen: Screens.VAULT, vault: { ...state.vault, active: true } };
+      }
       return state;
 
     case 'VAULT_CANCEL':
-      if (state.screen === Screens.VAULT) return { ...state, screen: Screens.WIZARD };
+      if (state.screen === Screens.VAULT) {
+        return { ...state, screen: Screens.WIZARD, vault: { ...state.vault, active: false } };
+      }
       return state;
 
     case 'RUN_START':
