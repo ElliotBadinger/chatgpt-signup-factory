@@ -28,6 +28,7 @@ signupx run --config config.yaml    # Headless mode
      - `[l]` Load config from `config.yaml`
      - `[s]` Save config to `config.yaml`
    - `[Tab]` cycles sections
+   - `[p]` toggles **Persist Secrets** when on Safety section
 2. **Preflight**
    - Structured checks (env vars, artifact dir accessibility)
    - Shows actionable failure hints
@@ -66,13 +67,14 @@ signupx run --config config.yaml    # Headless mode
 
 ## Encrypted Vault
 
-If `safety.persistSecrets: true` is set in the config:
+If `safety.persistSecrets: true` is set in the config (TUI only):
 
 - **Location**: `~/.account-factory/account.enc.json`
 - **Behavior**:
   - Before preflight, you will be prompted to create or unlock the vault.
   - **Unlock**: Enter your passcode to prefill identity (email/password) and billing details.
-  - **Create**: Set a passcode to encrypt successful run data.
+  - **Create**: Set a passcode and **confirm it** to encrypt successful run data.
+  - **Cancel** returns you to the wizard without loading or saving.
 - **Persistence**: Upon a successful run, the account and billing data used are encrypted and saved to the vault.
 - **Security**:
   - Uses AES-256-GCM.
