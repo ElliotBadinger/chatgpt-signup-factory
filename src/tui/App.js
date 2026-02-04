@@ -4,6 +4,7 @@ import { useApp, useInput } from 'ink';
 
 import { validateConfig, loadConfig, saveConfig } from '../config/manager.js';
 import { redactConfig } from '../config/redaction.js';
+import { mapLoadedConfigToState, mapStateToRunConfig } from './configHelpers.js';
 import { ArtifactManager } from '../artifacts/ArtifactManager.js';
 import { RunOrchestrator } from '../orchestrator/RunOrchestrator.js';
 import { Events } from '../orchestrator/events.js';
@@ -21,7 +22,7 @@ import { ResultsScreen } from './screens/ResultsScreen.js';
 
 const h = React.createElement;
 
-export default function App() {
+export default function App({ isActive: isActiveProp, configPath = 'config.yaml' } = {}) {
   const { exit } = useApp();
 
   const [ui, dispatch] = useReducer(reducer, undefined, createInitialState);
@@ -35,7 +36,7 @@ export default function App() {
   const checkpointResolveRef = useRef(null);
   const [checkpointPending, setCheckpointPending] = useState(false);
 
-  const isActive = Boolean(process.stdin && process.stdin.isTTY);
+  const isActive = isActiveProp ?? Boolean(process.stdin && process.stdin.isTTY);
 
   useInput(
     (input, key) => {
@@ -55,10 +56,10 @@ export default function App() {
 
   const handleLoadYaml = () => {
     try {
-      const loaded = loadConfig('config.yaml');
-      setConfig(loaded);
+      const loaded = loadConfig(configPath);
+      setConfig(mapLoadedConfigToState(loaded));
     } catch (e) {
-      // Potentially show error in UI
+      console.error('Load failed', e);
     }
   };
 
@@ -140,23 +141,13 @@ export default function App() {
       provisioner = new EmailProvisioner({ agentMailProvider, env: process.env });
       const provisioned = await provisioner.provision();
 
-      await orchestrator.run({
-        config: {
-          email: provisioned.address,
-          agentMailInbox: provisioned.inboxId,
-          password: config.identity.password || undefined,
-          headless: config.run.headless,
-          runConfig: {
-            MAX_RUN_MS: config.run.maxRunMs,
-            STEP_TIMEOUT_MS: config.run.stepTimeoutMs,
-            OTP_TIMEOUT_MS: config.identity.otpTimeoutMs,
-            SNAPSHOT_RETRY_MS: 3000,
-            STATE_STUCK_LIMIT: 10,
-          },
-          userDataDir: process.env.USER_DATA_DIR || undefined,
-          artifactDir: artifactManager.getRunDir(),
-        },
+      const runConfig = mapStateToRunConfig({
+        state: config,
+        provisioned,
+        artifactManager
       });
+
+      await orchestrator.run({ config: runConfig });
 
       artifactManager.updateManifest({ status: 'success' });
       setRunMeta((prev) => ({ ...prev, status: 'success' }));
@@ -188,6 +179,7 @@ export default function App() {
       onNext: () => dispatch({ type: 'NAV_NEXT' }),
       onLoadYaml: handleLoadYaml,
       onSaveYaml: handleSaveYaml,
+      isActive,
     });
   }
 

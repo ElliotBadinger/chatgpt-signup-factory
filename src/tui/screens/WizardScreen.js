@@ -24,24 +24,31 @@ export function WizardScreen({ config, setConfig, onNext, onLoadYaml, onSaveYaml
 
   useInput(
     (input, key) => {
+      const lower = input.toLowerCase();
       if (key.return) {
         onNext();
         return;
       }
-      if (input.toLowerCase() === 'tab') {
+      if (key.tab) {
         const idx = SECTIONS.indexOf(section);
         setSection(SECTIONS[(idx + 1) % SECTIONS.length]);
       }
-      if (input.toLowerCase() === 'l') {
+      if (lower === 'l') {
         onLoadYaml?.();
       }
-      if (input.toLowerCase() === 's') {
+      if (lower === 's') {
         onSaveYaml?.();
       }
       
       if (section === 'run') {
-        if (input.toLowerCase() === 'h') {
-          setConfig((c) => ({ ...c, run: { ...c.run, headless: !c.run.headless } }));
+        if (lower === 'h') {
+          setConfig((c) => ({
+            ...c,
+            run: {
+              ...(c.run || {}),
+              headless: !(c.run && c.run.headless)
+            }
+          }));
         }
       }
     },
@@ -52,7 +59,7 @@ export function WizardScreen({ config, setConfig, onNext, onLoadYaml, onSaveYaml
     switch (section) {
       case 'run':
         return h(Box, { flexDirection: 'column' },
-          h(Text, null, '[h] Headless: ', h(Text, { color: config.run?.headless ? 'green' : 'red' }, String(config.run?.headless))),
+          h(Text, null, '[h] Headless: ', h(Text, { color: config.run?.headless ? 'green' : 'red' }, String(!!config.run?.headless))),
           h(Text, null, `Max Run (ms): ${config.run?.maxRunMs}`),
           h(Text, null, `Step Timeout (ms): ${config.run?.stepTimeoutMs}`)
         );
