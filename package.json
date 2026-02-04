@@ -1,6 +1,6 @@
 {
   "name": "@ElliotBadinger/account-factory",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "bin": {
     "signupx": "src/cli/signupx.js"
@@ -27,6 +27,7 @@
     "debug": "4.4.3",
     "ink": "^4.4.1",
     "node-fetch": "^3.3.2",
+    "@puppeteer/browsers": "2.11.2",
     "puppeteer-core": "24.36.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
