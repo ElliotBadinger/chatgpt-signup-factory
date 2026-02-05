@@ -1,8 +1,10 @@
 import React from 'react';
 import {render} from 'ink';
 import App from './App.js';
+import { loadEnv } from '../config/envLoader.js';
 
 export function runTui({ configPath = 'config.yaml' } = {}) {
+	loadEnv({ configPath });
 	render(React.createElement(App, { configPath }));
 }
 

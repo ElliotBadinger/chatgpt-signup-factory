@@ -12,11 +12,11 @@ describe('TUI Screens UX', () => {
   describe('WizardScreen', () => {
     it('renders all required sections and redacted preview', () => {
       const config = { 
-        run: { headless: true, maxRunMs: 60000, stepTimeoutMs: 30000 }, 
-        identity: { password: 'secret-password' },
-        plan: { tier: 'plus' },
-        billing: { method: 'card' },
-        safety: { enabled: true },
+        run: { headless: true, maxRunMs: 60000, stepTimeoutMs: 30000, stealth: true }, 
+        identity: { email: 'user@example.com', password: 'secret-password' },
+        plan: { seats: 5, cadence: 'month' },
+        billing: { cardNumber: '4242424242424242', cvc: '123' },
+        safety: { requireConfirmBeforeSubscribe: true },
         artifacts: { outputDir: './runs' }
       };
       const { lastFrame } = render(React.createElement(WizardScreen, { config }));
@@ -30,7 +30,7 @@ describe('TUI Screens UX', () => {
       expect(lastFrame()).toContain('Artifacts');
       
       // Redacted preview
-      expect(lastFrame()).toContain('PREVIEW (REDACTED)');
+      expect(lastFrame()).toContain('Preview (redacted)');
       expect(lastFrame()).toContain('[REDACTED]');
       expect(lastFrame()).not.toContain('secret-password');
 
@@ -49,14 +49,14 @@ describe('TUI Screens UX', () => {
       };
       const { lastFrame } = render(React.createElement(PreflightScreen, { preflight }));
       expect(lastFrame()).toContain('Preflight Checklist');
-      expect(lastFrame()).toContain('env.test: Check Failed');
+      expect(lastFrame()).toContain('FAIL  env.test: Check Failed');
       expect(lastFrame()).toContain('Hint: Try fixing it');
     });
   });
 
   describe('ConfirmScreen', () => {
     it('shows redacted preview', () => {
-      const configRedacted = { password: '[REDACTED]' };
+      const configRedacted = { identity: { password: '[REDACTED]' }, run: {}, plan: {}, safety: {}, artifacts: {}, billing: {} };
       const { lastFrame } = render(React.createElement(ConfirmScreen, { configRedacted }));
       expect(lastFrame()).toContain('Confirm & Start');
       expect(lastFrame()).toContain('[REDACTED]');

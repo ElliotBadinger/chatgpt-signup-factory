@@ -1,6 +1,6 @@
 import fs from 'fs';
 import React, { useMemo, useReducer, useRef, useState } from 'react';
-import { useApp, useInput } from 'ink';
+import { Box, useApp, useInput } from 'ink';
 
 import { validateConfig, loadConfig, saveConfig } from '../config/manager.js';
 import { redactConfig } from '../config/redaction.js';
@@ -19,6 +19,7 @@ import { PreflightScreen } from './screens/PreflightScreen.js';
 import { ConfirmScreen } from './screens/ConfirmScreen.js';
 import { RunningScreen } from './screens/RunningScreen.js';
 import { ResultsScreen } from './screens/ResultsScreen.js';
+import { NotificationBar } from './components/NotificationBar.js';
 
 const h = React.createElement;
 
@@ -31,15 +32,30 @@ const redactSnapshotText = (text) => {
   return masked;
 };
 
-export default function App({ isActive: isActiveProp, configPath = 'config.yaml' } = {}) {
+export default function App({
+  isActive: isActiveProp,
+  configPath = 'config.yaml',
+  initialConfig = null,
+  preflightProvider = null,
+  orchestratorFactory = null,
+  provisionerFactory = null,
+} = {}) {
   const { exit } = useApp();
 
   const [ui, dispatch] = useReducer(reducer, undefined, createInitialState);
-  const [config, setConfig] = useState(() => validateConfig({}));
+  const [config, setConfig] = useState(() => {
+    if (initialConfig) return validateConfig(initialConfig);
+    return validateConfig({});
+  });
   const [timeline, setTimeline] = useState([]);
   const [artifacts, setArtifacts] = useState([]);
   const [failureSnapshotExcerpt, setFailureSnapshotExcerpt] = useState(null);
   const [runMeta, setRunMeta] = useState({ status: 'idle', runId: null, runDir: null, error: null });
+  const [notification, setNotification] = useState(null);
+
+  const notify = (level, message, detail = null) => {
+    setNotification({ level, message, detail, ts: Date.now() });
+  };
 
   // Checkpoint (before subscribe) approval bridge
   const checkpointResolveRef = useRef(null);
@@ -60,23 +76,32 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
   );
 
   const preflight = useMemo(() => {
-    return runPreflight({ env: process.env, artifactsDir: config.artifacts?.outputDir });
-  }, [config.artifacts?.outputDir]);
+    const provider =
+      preflightProvider ||
+      (({ env, artifactsDir }) => runPreflight({ env, artifactsDir }));
+
+    // Allow simple no-arg providers in tests.
+    return provider.length === 0
+      ? provider()
+      : provider({ env: process.env, artifactsDir: config.artifacts?.outputDir });
+  }, [preflightProvider, config.artifacts?.outputDir]);
 
   const handleLoadYaml = () => {
     try {
       const loaded = loadConfig(configPath);
       setConfig(mapLoadedConfigToState(loaded));
+      notify('success', `Loaded ${configPath}`);
     } catch (e) {
-      console.error('Load failed', e);
+      notify('error', `Failed to load ${configPath}`, String(e?.message || e));
     }
   };
 
   const handleSaveYaml = () => {
     try {
-      saveConfig('config.yaml', config);
+      saveConfig(configPath, config);
+      notify('success', `Saved ${configPath}`);
     } catch (e) {
-      // Potentially show error in UI
+      notify('error', `Failed to save ${configPath}`, String(e?.message || e));
     }
   };
 
@@ -86,6 +111,7 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
     setTimeline([]);
     setArtifacts([]);
     setFailureSnapshotExcerpt(null);
+    notify('info', 'Run started');
 
     const artifactManager = new ArtifactManager({ baseDir: config.artifacts.outputDir, config });
     const logger = new RunLogger({ artifactManager });
@@ -107,8 +133,10 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
       },
     };
 
-    const orchestrator = new RunOrchestrator({
+    const orchestrator = (orchestratorFactory || ((deps) => new RunOrchestrator({
       agentMailApiKey: process.env.AGENTMAIL_API_KEY,
+      ...deps,
+    })))({
       checkpointProvider,
       artifactManager,
       logger,
@@ -147,8 +175,12 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
     let provisioner = null;
 
     try {
-      const agentMailProvider = new AgentMailProvider(process.env.AGENTMAIL_API_KEY);
-      provisioner = new EmailProvisioner({ agentMailProvider, env: process.env });
+      if (provisionerFactory) {
+        provisioner = provisionerFactory({ env: process.env });
+      } else {
+        const agentMailProvider = new AgentMailProvider(process.env.AGENTMAIL_API_KEY);
+        provisioner = new EmailProvisioner({ agentMailProvider, env: process.env });
+      }
       const provisioned = await provisioner.provision();
 
       const runConfig = mapStateToRunConfig({
@@ -161,10 +193,12 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
 
       artifactManager.updateManifest({ status: 'success' });
       setRunMeta((prev) => ({ ...prev, status: 'success' }));
+      notify('success', 'Run completed successfully');
       dispatch({ type: 'RUN_SUCCESS' });
     } catch (e) {
       artifactManager.updateManifest({ status: 'failure', failure_summary: String(e?.message || e) });
       setRunMeta((prev) => ({ ...prev, status: 'failure', error: String(e?.message || e) }));
+      notify('error', 'Run failed', String(e?.message || e));
       dispatch({ type: 'RUN_FAILURE', error: String(e?.message || e) });
     } finally {
       if (provisioner) {
@@ -183,42 +217,70 @@ export default function App({ isActive: isActiveProp, configPath = 'config.yaml'
   };
 
   if (ui.screen === Screens.WIZARD) {
-    return h(WizardScreen, {
-      config,
-      setConfig,
-      onNext: () => dispatch({ type: 'NAV_NEXT' }),
-      onLoadYaml: handleLoadYaml,
-      onSaveYaml: handleSaveYaml,
-      isActive,
-    });
+    return h(
+      Box,
+      { flexDirection: 'column' },
+      h(NotificationBar, { notification }),
+      h(WizardScreen, {
+        config,
+        setConfig,
+        onNext: () => dispatch({ type: 'NAV_NEXT' }),
+        onLoadYaml: handleLoadYaml,
+        onSaveYaml: handleSaveYaml,
+        isActive,
+      })
+    );
   }
 
   if (ui.screen === Screens.PREFLIGHT) {
-    return h(PreflightScreen, {
-      preflight,
-      onBack: () => dispatch({ type: 'NAV_BACK' }),
-      onNext: () => dispatch({ type: 'NAV_NEXT' }),
-    });
+    return h(
+      Box,
+      { flexDirection: 'column' },
+      h(NotificationBar, { notification }),
+      h(PreflightScreen, {
+        preflight,
+        onBack: () => dispatch({ type: 'NAV_BACK' }),
+        onNext: () => dispatch({ type: 'NAV_NEXT' }),
+        isActive,
+      })
+    );
   }
 
   if (ui.screen === Screens.CONFIRM) {
-    return h(ConfirmScreen, {
-      configRedacted: redactConfig(config),
-      onBack: () => dispatch({ type: 'NAV_BACK' }),
-      onStart: startRun,
-    });
+    return h(
+      Box,
+      { flexDirection: 'column' },
+      h(NotificationBar, { notification }),
+      h(ConfirmScreen, {
+        configRedacted: redactConfig(config),
+        onBack: () => dispatch({ type: 'NAV_BACK' }),
+        onStart: startRun,
+        isActive,
+      })
+    );
   }
 
   if (ui.screen === Screens.RUNNING) {
-    return h(RunningScreen, {
-      timeline,
-      runMeta,
-      checkpointPending,
-      onCheckpointDecision: approveCheckpoint,
-      artifacts,
-      failureSnapshotExcerpt,
-    });
+    return h(
+      Box,
+      { flexDirection: 'column' },
+      h(NotificationBar, { notification }),
+      h(RunningScreen, {
+        timeline,
+        runMeta,
+        checkpointPending,
+        onCheckpointDecision: approveCheckpoint,
+        artifacts,
+        failureSnapshotExcerpt,
+        isActive,
+      })
+    );
   }
 
-  return h(ResultsScreen, { runMeta });
+  return h(
+    Box,
+    { flexDirection: 'column' },
+    h(NotificationBar, { notification }),
+    h(ResultsScreen, { runMeta })
+  );
 }

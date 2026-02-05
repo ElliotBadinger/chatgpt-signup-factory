@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { Header } from '../components/Header.js';
+import SelectInput from 'ink-select-input';
 
+import { Header } from '../components/Header.js';
+import { KeyValueTable } from '../components/KeyValueTable.js';
 import { redactConfig } from '../../config/redaction.js';
 
 const h = React.createElement;
@@ -13,7 +15,7 @@ const SECTION_LABELS = {
   plan: 'Plan',
   billing: 'Billing',
   safety: 'Safety',
-  artifacts: 'Artifacts'
+  artifacts: 'Artifacts',
 };
 
 export function WizardScreen({ config, setConfig, onNext, onLoadYaml, onSaveYaml, isActive: isActiveProp }) {
@@ -26,98 +28,145 @@ export function WizardScreen({ config, setConfig, onNext, onLoadYaml, onSaveYaml
     (input, key) => {
       const lower = input.toLowerCase();
       if (key.return) {
-        onNext();
+        onNext?.();
         return;
       }
-      if (key.tab) {
-        const idx = SECTIONS.indexOf(section);
-        setSection(SECTIONS[(idx + 1) % SECTIONS.length]);
-      }
-      if (lower === 'l') {
-        onLoadYaml?.();
-      }
-      if (lower === 's') {
-        onSaveYaml?.();
-      }
-      
-      if (section === 'run') {
-        if (lower === 'h') {
-          setConfig((c) => ({
-            ...c,
-            run: {
-              ...(c.run || {}),
-              headless: !(c.run && c.run.headless)
-            }
-          }));
-        }
+
+      if (lower === 'l') onLoadYaml?.();
+      if (lower === 's') onSaveYaml?.();
+
+      // Minimal in-TUI editing for the most common toggle.
+      if (section === 'run' && lower === 'h') {
+        setConfig?.((c) => ({
+          ...c,
+          run: {
+            ...(c.run || {}),
+            headless: !(c.run && c.run.headless),
+          },
+        }));
       }
     },
     { isActive }
   );
 
-  const renderSectionContent = () => {
+  const menuItems = useMemo(
+    () =>
+      SECTIONS.map((s) => ({
+        label: SECTION_LABELS[s],
+        value: s,
+      })),
+    []
+  );
+
+  const sectionRows = useMemo(() => {
     switch (section) {
       case 'run':
-        return h(Box, { flexDirection: 'column' },
-          h(Text, null, '[h] Headless: ', h(Text, { color: config.run?.headless ? 'green' : 'red' }, String(!!config.run?.headless))),
-          h(Text, null, `Max Run (ms): ${config.run?.maxRunMs}`),
-          h(Text, null, `Step Timeout (ms): ${config.run?.stepTimeoutMs}`)
-        );
+        return [
+          ['Headless [h]', !!config.run?.headless],
+          ['Stealth', !!config.run?.stealth],
+          ['Max run (ms)', config.run?.maxRunMs],
+          ['Step timeout (ms)', config.run?.stepTimeoutMs],
+        ];
       case 'identity':
-        return h(Box, { flexDirection: 'column' },
-          h(Text, null, `Email: ${configRedacted.identity?.email || '(auto)'}`),
-          h(Text, null, `Password: ${configRedacted.identity?.password || '(none)'}`)
-        );
+        return [
+          ['Email', configRedacted.identity?.email || '(auto)'],
+          ['Password', configRedacted.identity?.password || '(generated)'],
+          ['OTP timeout (ms)', config.identity?.otpTimeoutMs],
+        ];
       case 'plan':
-        return h(Box, { flexDirection: 'column' },
-          h(Text, null, `Tier: ${config.plan?.tier || 'free'}`)
-        );
+        return [
+          ['Seats', config.plan?.seats],
+          ['Cadence', config.plan?.cadence],
+        ];
       case 'billing':
-        return h(Box, { flexDirection: 'column' },
-          h(Text, null, `Method: ${config.billing?.method || 'none'}`),
-          h(Text, null, `Card: ${configRedacted.billing?.cardNumber || 'N/A'}`)
-        );
+        return [
+          ['Card', configRedacted.billing?.cardNumber || '(auto)'],
+          ['Exp month', configRedacted.billing?.expMonth || '—'],
+          ['Exp year', configRedacted.billing?.expYear || '—'],
+          ['CVC', configRedacted.billing?.cvc || '—'],
+          ['ZIP', configRedacted.billing?.billingZip || '—'],
+          ['Country', configRedacted.billing?.billingCountry || '—'],
+        ];
       case 'safety':
-        return h(Box, { flexDirection: 'column' },
-          h(Text, null, `Enabled: ${config.safety?.enabled ? 'Yes' : 'No'}`)
-        );
+        return [
+          ['Confirm before subscribe', !!config.safety?.requireConfirmBeforeSubscribe],
+          ['Persist secrets', !!config.safety?.persistSecrets],
+        ];
       case 'artifacts':
-        return h(Box, { flexDirection: 'column' },
-          h(Text, null, `Output Dir: ${config.artifacts?.outputDir}`)
-        );
+        return [['Output dir', config.artifacts?.outputDir]];
       default:
-        return null;
+        return [];
     }
-  };
+  }, [section, config, configRedacted]);
+
+  const previewRows = useMemo(() => {
+    return [
+      ['Email', configRedacted.identity?.email || '(auto)'],
+      ['Password', configRedacted.identity?.password || '(generated)'],
+      ['Card', configRedacted.billing?.cardNumber || '(auto)'],
+      ['Headless', !!config.run?.headless],
+      ['Stealth', !!config.run?.stealth],
+      ['Seats', config.plan?.seats],
+      ['Cadence', config.plan?.cadence],
+      ['Confirm before subscribe', !!config.safety?.requireConfirmBeforeSubscribe],
+      ['Artifacts dir', config.artifacts?.outputDir],
+    ];
+  }, [config, configRedacted]);
 
   return h(
     Box,
     { flexDirection: 'column' },
     h(Header, { title: 'Config Wizard' }),
+
     h(
       Box,
-      { marginBottom: 1, flexWrap: 'wrap' },
-      SECTIONS.map(s => h(
-        Text,
-        { key: s, backgroundColor: section === s ? 'blue' : undefined, marginRight: 1 },
-        ` [ ${SECTION_LABELS[s]} ] `
-      ))
+      { flexDirection: 'row', gap: 2 },
+      h(
+        Box,
+        { flexDirection: 'column', width: 24, borderStyle: 'round', borderColor: 'gray', paddingX: 1 },
+        h(Text, { bold: true }, 'Sections'),
+        h(Text, { dimColor: true }, isActive ? '↑/↓ select' : '(non-interactive in tests)'),
+        isActive
+          ? h(SelectInput, {
+              items: menuItems,
+              initialIndex: Math.max(0, SECTIONS.indexOf(section)),
+              onSelect: (item) => setSection(item.value),
+            })
+          : h(
+              Box,
+              { flexDirection: 'column', marginTop: 1 },
+              ...menuItems.map((it) =>
+                h(
+                  Text,
+                  { key: it.value, color: it.value === section ? 'cyan' : undefined },
+                  `${it.value === section ? '>' : ' '} ${it.label}`
+                )
+              )
+            )
+      ),
+      h(
+        Box,
+        { flexDirection: 'column', flexGrow: 1 },
+        h(
+          Box,
+          { borderStyle: 'round', borderColor: 'gray', paddingX: 1, paddingY: 0, marginBottom: 1 },
+          h(Text, { bold: true }, SECTION_LABELS[section]),
+          h(Box, { flexDirection: 'column', marginTop: 1 }, h(KeyValueTable, { rows: sectionRows }))
+        ),
+        h(
+          Box,
+          { borderStyle: 'round', borderColor: 'gray', paddingX: 1 },
+          h(Text, { bold: true }, 'Preview (redacted)'),
+          h(Box, { flexDirection: 'column', marginTop: 1 }, h(KeyValueTable, { rows: previewRows }))
+        )
+      )
     ),
+
     h(
       Box,
-      { borderStyle: 'round', paddingX: 1, marginBottom: 1, minHeight: 5 },
-      renderSectionContent()
-    ),
-    h(
-      Box,
-      { flexDirection: 'column', borderStyle: 'single', borderColor: 'gray', paddingX: 1, marginBottom: 1 },
-      h(Text, { bold: true }, 'PREVIEW (REDACTED)'),
-      h(Text, { dimColor: true }, JSON.stringify(configRedacted, null, 2))
-    ),
-    h(Box, { flexDirection: 'row' },
+      { marginTop: 1 },
       h(Text, { dimColor: true }, '[l] Load YAML  '),
       h(Text, { dimColor: true }, '[s] Save YAML  '),
-      h(Text, { dimColor: true }, '[Tab] Switch Section  '),
       h(Text, { dimColor: true }, 'Enter → Preflight')
     )
   );

@@ -9,6 +9,6 @@ export function ArtifactList({ artifacts }) {
   return React.createElement(
     Box,
     { flexDirection: 'column' },
-    ...artifacts.map((a, i) => React.createElement(Text, { key: i }, `📄 ${a}`))
+    ...artifacts.map((a, i) => React.createElement(Text, { key: i, wrap: 'truncate-end' }, `- ${a}`))
   );
 }
