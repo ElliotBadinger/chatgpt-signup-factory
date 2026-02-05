@@ -1,6 +1,12 @@
 node_modules
 .worktrees
 
+# Local env
+.env
+
+# Scratch/experimental files
+/scratch/
+
 # E2E artifacts (snapshots/screenshots)
 /artifacts/
 *_snapshot.txt
