@@ -2231,12 +2231,17 @@ export function findPricingTryCtaUid(snapshot) {
   if (!snapshot) return null;
 
   // Prefer explicit labeled CTA.
+  // NOTE: Do NOT match the in-chat "Free offer" pill here. That button can exist even when the pricing UI
+  // is not actually rendered (e.g. url hash is #pricing but the SPA stayed on the chat home).
   const labeled =
     snapshot.match(/uid=(\d+_\d+) (?:button|link) "Try for [^"]+"/i) ||
     snapshot.match(/uid=(\d+_\d+) (?:button|link) "Try for free"/i) ||
     snapshot.match(/uid=(\d+_\d+) (?:button|link) "Try Business free"/i) ||
     snapshot.match(/uid=(\d+_\d+) (?:button|link) "Try Business"/i) ||
-    snapshot.match(/uid=(\d+_\d+) (?:button|link) "Free offer"/i);
+    snapshot.match(/uid=(\d+_\d+) (?:button|link) "Upgrade to Business"/i) ||
+    snapshot.match(/uid=(\d+_\d+) (?:button|link) "Upgrade to Team"/i) ||
+    snapshot.match(/uid=(\d+_\d+) (?:button|link) "Upgrade to [^"]*Business[^"]*"/i) ||
+    snapshot.match(/uid=(\d+_\d+) (?:button|link) "Upgrade to [^"]*Team[^"]*"/i);
   if (labeled) return labeled[1];
 
   // Fallback: unlabeled primary CTA is often the first button following the main Business trial heading.

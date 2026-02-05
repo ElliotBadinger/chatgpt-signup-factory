@@ -3,7 +3,9 @@ import { SignupFactory } from './SignupFactory.js';
 import { AgentMailProvider } from './AgentMailProvider.js';
 import { EmailProvisioner } from './EmailProvisioner.js';
 import { getRunConfig } from './RunConfig.js';
+import { loadEnv } from './config/envLoader.js';
 
+loadEnv();
 const API_KEY = process.env.AGENTMAIL_API_KEY;
 if (!API_KEY) {
     console.error('ERROR: AGENTMAIL_API_KEY environment variable is required.');

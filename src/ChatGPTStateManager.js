@@ -81,9 +81,14 @@ export class ChatGPTStateManager {
     }
 
     // PRICING
+    // IMPORTANT: the logged-in chat shell can be at url="#pricing" without actually rendering the pricing modal.
+    // We only classify PRICING when we see pricing-specific UI markers (modal or pricing content).
     if (
-      snapshot.includes('#pricing') ||
-      snapshot.includes('url="https://chatgpt.com/#pricing') ||
+      snapshot.includes('heading "Upgrade your plan"') ||
+      snapshot.includes('Upgrade your plan') ||
+      snapshot.includes('Toggle for switching between Personal and Business plans') ||
+      snapshot.includes('Upgrade to Business') ||
+      snapshot.includes('Upgrade to Team') ||
       snapshot.includes('Try Business free for 1 month')
     ) {
       return 'PRICING';

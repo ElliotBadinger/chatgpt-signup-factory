@@ -1,5 +1,11 @@
 node_modules
 .worktrees
+.env
+
+# Dev-only docs/tests
+/docs/benchmarks/
+/docs/plans/
+/tests/
 
 # E2E artifacts (snapshots/screenshots)
 /artifacts/
