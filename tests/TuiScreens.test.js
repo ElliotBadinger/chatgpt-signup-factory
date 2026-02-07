@@ -37,7 +37,7 @@ describe('TUI Screens UX', () => {
       expect(lastFrame()).toContain('Billing');
       expect(lastFrame()).toContain('Safety');
       expect(lastFrame()).toContain('Artifacts');
-      expect(lastFrame()).toContain('Persist secrets');
+      expect(lastFrame()).toContain('Persist Secrets');
       
       // Redacted preview
       expect(lastFrame()).toContain('Preview (redacted)');
