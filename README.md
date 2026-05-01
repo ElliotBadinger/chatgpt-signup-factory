@@ -22,3 +22,8 @@ This repository contains the behavior-preserving pipeline used to:
 - `docs/tui.md` — TUI behavior and usage guidance.
 - `docs/plans/` — design and phase planning notes.
 - `docs/recovery/` — provenance/recovery history notes and archived benchmark/script artifacts.
+
+## Testing
+
+- `npm test` runs the canonical local gate (`<rootDir>/tests/**/*.test.js`).
+- `npm run test:all` runs broad discovery (`**/tests/**/*.test.js`), including recovery/integration trees by opt-in.
