@@ -16,3 +16,7 @@ The active runtime source of truth lives in `src/`, root runtime config files, a
 Removed from active tree:
 
 - `debug_snapshot.txt`
+
+## Relocated recovery snapshots
+
+- `docs/recovery/snapshots/golden-sentinel-json-recovery/` (relocated from repository root `golden-sentinel-json-recovery/`)
