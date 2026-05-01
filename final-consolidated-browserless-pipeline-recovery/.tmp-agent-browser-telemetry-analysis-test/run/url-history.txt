@@ -1,2 +1,0 @@
-https://auth.openai.com/log-in
-https://chatgpt.com/auth/login_with

@@ -1,4 +1,0 @@
-ref=feat/yutori-browsing-account-creation
-commit=0d14ce2d9f7a622940e30e52175bfe4a9772cdfe
-date=2026-03-15 19:32:51 +0200
-subject=feat(yutori): v3 redesign — Cloudflare Worker OTP proxy + password handling

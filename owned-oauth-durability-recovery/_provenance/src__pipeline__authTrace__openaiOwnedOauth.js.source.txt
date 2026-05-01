@@ -1,6 +1,0 @@
-session=/home/epistemophile/.codex/sessions/2026/04/01/rollout-2026-04-01T10-59-28-019d4844-e632-7cc2-a997-d7886e0932c8.jsonl
-line=1245 range=1-320 len=9058
-line=1261 range=321-520 len=6029
-line=1269 range=520-760 len=9654
-line=1275 range=760-980 len=7434
-stitch=sed-ranges-1245-1275-plus-final-closing-brace

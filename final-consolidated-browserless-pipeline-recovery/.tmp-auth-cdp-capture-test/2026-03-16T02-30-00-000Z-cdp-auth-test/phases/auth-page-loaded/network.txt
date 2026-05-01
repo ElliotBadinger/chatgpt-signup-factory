@@ -1,1 +1,0 @@
-120ms  1000B  fetch  https://auth.openai.com/api/accounts/authorize
