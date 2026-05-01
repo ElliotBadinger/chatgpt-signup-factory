@@ -20,3 +20,4 @@ Removed from active tree:
 ## Relocated recovery snapshots
 
 - `docs/recovery/snapshots/golden-sentinel-json-recovery/` (relocated from repository root `golden-sentinel-json-recovery/`)
+- `docs/recovery/snapshots/session-replay-write-edit-reconstructed/` (relocated from repository root `session-replay-write-edit-reconstructed/`)
