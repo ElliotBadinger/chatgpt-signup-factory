@@ -1,0 +1,47 @@
+{
+  "name": "@ElliotBadinger/account-factory",
+  "version": "1.0.5",
+  "type": "module",
+  "bin": {
+    "signupx": "src/cli/signupx.js"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "main": "src/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "tui": "node src/tui/entrypoint.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.26.0",
+    "@puppeteer/browsers": "2.11.2",
+    "commander": "^11.1.0",
+    "core-js": "^3.48.0",
+    "debug": "4.4.3",
+    "dotenv": "^16.6.1",
+    "ink": "^4.4.1",
+    "ink-select-input": "^5.0.0",
+    "ink-spinner": "^5.0.0",
+    "node-fetch": "^3.3.2",
+    "puppeteer-core": "24.36.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "react": "^18.2.0",
+    "yaml": "^2.8.2",
+    "yargs": "18.0.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "fast-check": "^4.5.3",
+    "ink-testing-library": "^3.0.0",
+    "jest": "^30.2.0"
+  }
+}
