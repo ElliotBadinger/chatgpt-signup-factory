@@ -1,0 +1,4 @@
+ref=
+commit=17bd43cd01abd2ca4da655d5821c6955621e6d0e
+date=2026-03-14 22:15:13 +0200
+subject=fix: chatGptAccountCreator — load chatgpt.com/ first (Cloudflare cookie), click signup-button + waitForNavigation race, wrap click() with Promise.resolve(), add navigationDelayMs/pageStateCheck* options for test speed; 216 tests pass in 18s

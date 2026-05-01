@@ -1,0 +1,4 @@
+session=/home/epistemophile/.codex/sessions/2026/04/07/rollout-2026-04-07T02-17-09-019d654c-2023-7a12-935e-e75f36b35de0.jsonl
+line=2940 range=embedded 1-180 len=10332
+line=2944 range=178-290 len=2371
+stitch=embedded-otp-plus-tail

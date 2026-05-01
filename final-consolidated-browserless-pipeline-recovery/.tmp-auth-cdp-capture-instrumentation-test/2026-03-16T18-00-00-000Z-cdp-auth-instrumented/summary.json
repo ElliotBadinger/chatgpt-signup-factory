@@ -1,0 +1,41 @@
+{
+  "runId": "2026-03-16T18-00-00-000Z-cdp-auth-instrumented",
+  "runDir": "/home/epistemophile/Development/chatgpt-factory-bundle/.recovered-source/deterministic-agentmail-pipeline-clone/final-consolidated-browserless-pipeline-recovery/.tmp-auth-cdp-capture-instrumentation-test/2026-03-16T18-00-00-000Z-cdp-auth-instrumented",
+  "scenario": "signup-new",
+  "label": "cdp-auth-instrumented",
+  "startUrl": "https://auth.openai.com/log-in-or-create-account",
+  "createdAt": "2026-03-16T18:00:00.000Z",
+  "captureMode": "chrome-cdp-live",
+  "cdpPort": 41565,
+  "cdpWsUrl": null,
+  "target": {
+    "targetId": "ABCDEF1234567890",
+    "targetIdPrefix": "ABCDEF12",
+    "title": "Login",
+    "url": "https://auth.openai.com/log-in-or-create-account"
+  },
+  "finalTargetPrefix": "ABCDEF12",
+  "phaseCount": 8,
+  "recorderSummary": {
+    "stoppedAt": "2026-03-16T18:01:00.000Z",
+    "eventCounts": {
+      "Network.requestWillBeSent": 12
+    },
+    "criticalRequests": [
+      {
+        "url": "https://chatgpt.com/auth/login_with",
+        "status": 200
+      }
+    ],
+    "jsExceptions": [
+      {
+        "text": "TypeError: boom"
+      }
+    ],
+    "challengeSignals": [
+      {
+        "kind": "cloudflare-challenge-script"
+      }
+    ]
+  }
+}

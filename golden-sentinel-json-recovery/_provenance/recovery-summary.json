@@ -1,0 +1,13 @@
+{
+  "status": "partial-json-recovery",
+  "recoveredFiles": [
+    "artifacts/auth-traces/2026-03-15T20-01-44-099Z-deep-golden-signup-v2/openai-auth-report.json",
+    "artifacts/auth-traces/2026-03-15T20-01-44-099Z-deep-golden-signup-v2/openai-auth-plan.json"
+  ],
+  "sourceEvidence": "/home/epistemophile/Development/chatgpt-factory-bundle/.recovered-source/deterministic-agentmail-pipeline-clone/_evidence/golden-trace-session-outputs/output-058-line-112.txt",
+  "notes": [
+    "openai-auth-report.json was recovered from a full sed output in a Codex session for artifacts/auth-replays/2026-03-16T20-23-24Z-eagerstatus254-existing-login-otp/openai-auth-report.json; that report references the exact golden traceDir.",
+    "openai-auth-plan.json was reconstructed from recovered src/pipeline/authTrace/openaiAuthTelemetryAnalysis.js plan builders using the recovered report. Its generatedAt is set to the report generatedAt; the exact original plan generatedAt may have differed by milliseconds.",
+    "The full artifacts/auth-traces/2026-03-15T20-01-44-099Z-deep-golden-signup-v2 directory is not currently present on disk."
+  ]
+}

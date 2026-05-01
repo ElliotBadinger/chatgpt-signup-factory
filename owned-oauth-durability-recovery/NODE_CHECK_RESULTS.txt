@@ -1,0 +1,8 @@
+OK src/pipeline/authTrace/agentMailOtp.js
+OK src/pipeline/authTrace/openaiAuthReplay.js
+OK src/pipeline/authTrace/openaiOwnedOauth.js
+OK src/pipeline/authTrace/recoverBrowserlessIdentity.js
+OK src/pipeline/rotation/billingBoundaryProbe.js
+OK src/pipeline/rotation/browserlessMemberOnboarder.js
+OK src/pipeline/rotation/routerOnboarder.js
+OK tests/pipeline/authTrace/openaiOwnedOauth.test.js

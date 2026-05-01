@@ -1,0 +1,19 @@
+{
+  "loginWith": {
+    "url": "https://chatgpt.com/auth/login_with",
+    "status": 200
+  },
+  "followUpFailures": [],
+  "restartedLogin": null,
+  "jsExceptions": [
+    {
+      "text": "TypeError: boom"
+    }
+  ],
+  "challengeSignals": [
+    {
+      "kind": "cloudflare-challenge-script"
+    }
+  ],
+  "likelyFailurePoint": "Challenge/bot-detection signals appeared during ChatGPT bootstrap"
+}

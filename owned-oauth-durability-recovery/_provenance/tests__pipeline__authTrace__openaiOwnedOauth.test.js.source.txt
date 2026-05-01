@@ -1,0 +1,4 @@
+session=/home/epistemophile/.codex/sessions/2026/03/31/rollout-2026-03-31T19-34-49-019d44f6-5e21-79e2-b8bd-7ca671eef62f.jsonl
+line=18
+len=36270
+numbered_lines_stripped=yes

@@ -1,0 +1,21 @@
+# Dependencies / build output
+node_modules/
+video/
+_verification/
+.DS_Store
+
+# Sensitive/generated runtime artifacts
+_evidence/
+**/_evidence/
+artifacts/auth-traces/
+**/artifacts/auth-traces/
+.omx/
+**/.omx/
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Local account/runtime files
+accounts-created.txt
+agentmail_accounts.csv

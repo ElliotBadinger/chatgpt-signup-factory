@@ -1,0 +1,8 @@
+{
+  "localStorage": {
+    "a": "1"
+  },
+  "sessionStorage": {
+    "b": "2"
+  }
+}

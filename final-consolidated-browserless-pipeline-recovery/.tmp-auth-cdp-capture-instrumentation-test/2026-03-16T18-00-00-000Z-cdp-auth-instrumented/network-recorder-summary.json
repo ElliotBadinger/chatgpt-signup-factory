@@ -1,0 +1,22 @@
+{
+  "stoppedAt": "2026-03-16T18:01:00.000Z",
+  "eventCounts": {
+    "Network.requestWillBeSent": 12
+  },
+  "criticalRequests": [
+    {
+      "url": "https://chatgpt.com/auth/login_with",
+      "status": 200
+    }
+  ],
+  "jsExceptions": [
+    {
+      "text": "TypeError: boom"
+    }
+  ],
+  "challengeSignals": [
+    {
+      "kind": "cloudflare-challenge-script"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{"url":"https://chatgpt.com/auth/login_with","method":"GET","status":200,"responseHeaders":{"server":"cloudflare","set-cookie":"__Host-next-auth.csrf-token=csrf-value%7Chash; Path=/; HttpOnly\n__Secure-next-auth.callback-url=https%3A%2F%2Fchatgpt.com; Path=/; HttpOnly\n__cf_bm=bm1; Path=/; Domain=chatgpt.com"}}
+{"url":"https://chatgpt.com/cdn-cgi/challenge-platform/h/g/scripts/jsd/main.js","method":"GET","status":200,"responseHeaders":{"server":"cloudflare"}}
+{"url":"https://chatgpt.com/cdn-cgi/challenge-platform/h/g/jsd/oneshot/token/ray","method":"POST","status":200,"responseHeaders":{"server":"cloudflare","set-cookie":"cf_clearance=clear123; Path=/; Domain=chatgpt.com\n__cf_bm=bm2; Path=/; Domain=chatgpt.com"}}
+{"url":"https://chatgpt.com/api/auth/providers","method":"GET","status":200,"responseHeaders":{}}
+{"url":"https://chatgpt.com/api/auth/csrf","method":"GET","status":200,"responseHeaders":{"set-cookie":"__Secure-next-auth.callback-url=https%3A%2F%2Fchatgpt.com%2Fauth%2Flogin_with; Path=/; HttpOnly"},"responseBody":{"text":"{\"csrfToken\":\"csrf-value\"}"}}
+{"url":"https://chatgpt.com/api/auth/signin/openai?prompt=login","method":"POST","status":200,"postData":"callbackUrl=https%3A%2F%2Fchatgpt.com%2Fauth%2Flogin_with&csrfToken=csrf-value&json=true","responseHeaders":{"set-cookie":"__Secure-next-auth.state=state-123; Path=/; HttpOnly"}}
+{"url":"https://auth.openai.com/api/accounts/authorize?prompt=login","method":"GET","status":200,"responseHeaders":{}}
