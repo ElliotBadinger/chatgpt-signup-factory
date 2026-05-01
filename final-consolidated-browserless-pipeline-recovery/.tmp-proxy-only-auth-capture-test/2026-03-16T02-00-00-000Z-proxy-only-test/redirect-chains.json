@@ -1,7 +1,0 @@
-[
-  {
-    "from": "https://auth.openai.com/api/accounts/authorize?client_id=x",
-    "to": "https://auth.openai.com/create-account/password",
-    "status": 302
-  }
-]

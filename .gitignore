@@ -1,21 +1,65 @@
-# Dependencies / build output
+# Dependencies / package managers
 node_modules/
-video/
-_verification/
-.DS_Store
+.npm/
+.pnpm-store/
 
-# Sensitive/generated runtime artifacts
+# Build / coverage / logs
+coverage/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Mac / editor clutter
+.DS_Store
+.vscode/
+.idea/
+
+# Generic temp files and folders
+tmp/
+temp/
+.tmp/
+.tmp-*/
+*.tmp
+
+# Runtime evidence + generated artifacts
 _evidence/
 **/_evidence/
+_verification/
+video/
 artifacts/auth-traces/
 **/artifacts/auth-traces/
-.omx/
-**/.omx/
+
+# Local env / credentials / auth traces
 .env
 .env.*
 **/.env
 **/.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.session
+*.cookie
+cookies*.json
+credentials*.json
+secrets/
 
-# Local account/runtime files
+# Local browser/profile state
+.omx/
+**/.omx/
+.browserless/
+playwright/.auth/
+chrome-user-data/
+chromium-profile/
+puppeteer-profile/
+
+# Local pipeline account outputs
 accounts-created.txt
 agentmail_accounts.csv
+
+# Generated runtime state
+state/

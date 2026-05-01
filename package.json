@@ -1,0 +1,35 @@
+{
+  "name": "deterministic-agentmail-pipeline",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Deterministic AgentMail browserless pipeline with guardrail-first rotation and auth-trace tooling",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "smoke:status": "node src/cli/pipeline-status.js",
+    "pipeline:bootstrap": "node src/cli/pipeline-bootstrap.js",
+    "pipeline:consume": "node src/cli/pipeline-consume.js",
+    "pipeline:rotate": "node src/cli/pipeline-rotate.js",
+    "pipeline:check-archive-replace": "node src/cli/pipeline-check-archive-replace.js",
+    "pipeline:agentmail-signup": "node src/cli/pipeline-agentmail-signup.js",
+    "pipeline:agentmail-verify": "node src/cli/pipeline-agentmail-verify.js",
+    "pipeline:auth-trace": "node src/cli/pipeline-auth-trace.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "puppeteer-core": "^24.36.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "jest": "^29.7.0"
+  }
+}
