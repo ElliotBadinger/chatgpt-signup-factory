@@ -60,3 +60,6 @@ puppeteer-profile/
 # Local pipeline account outputs
 accounts-created.txt
 agentmail_accounts.csv
+
+# Generated runtime state
+state/

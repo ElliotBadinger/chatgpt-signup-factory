@@ -17,7 +17,6 @@ import { buildMitmAddonSource, writeJsonArtifact } from './deepCaptureArtifacts.
 import { buildCookieChronology, buildRedirectChains, mergeDeepEvidence } from './mergeDeepEvidence.js';
 import { ensureMitmCertificateTrusted, findCertutilBinary } from './trustMitmCertificate.js';
 import { connectToBrowser as defaultConnectToBrowser } from './connectToBrowser.js';
-import { connectToBrowser as defaultConnectToBrowser } from './connectToBrowser.js';
 
 function defaultCheckpointRecorder(page, runDir) {
   return {
