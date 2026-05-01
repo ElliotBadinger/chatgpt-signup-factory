@@ -1,11 +1,33 @@
-node_modules
-.worktrees
+# Dependencies
+/node_modules/
+.worktrees/
 
-# Local env
+# Local environment and credentials
 .env
+.env.*
+!.env.example
+*.local
+*.secret
+*.secrets
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+/secrets/
+/credentials/
+/.vault/
 
-# Scratch/experimental files
+# Scratch and local experimentation
 /scratch/
+
+# Runtime/browser state
+/profiles/
+/browser-profiles/
+/chrome-profile/
+/playwright/.auth/
+/user-data/
+/state/
 
 # E2E artifacts (snapshots/screenshots)
 /artifacts/
@@ -14,7 +36,6 @@ node_modules
 failure_meta*.json
 auth_error_*
 restart_cloudflare_*
-
 step_*_preparse_*.png
 ambiguous_*
 failure_*
@@ -23,3 +44,13 @@ cloudflare_wait_*
 landing_*
 login_*
 turnstile_*
+
+# Logs and temporary output
+/logs/
+/tmp/
+/.temp/
+/.cache/
+*.log
+*.log.*
+*.tmp
+*.pid
