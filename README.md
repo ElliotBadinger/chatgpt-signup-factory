@@ -21,4 +21,4 @@ This repository contains the behavior-preserving pipeline used to:
 
 - `docs/tui.md` — TUI behavior and usage guidance.
 - `docs/plans/` — design and phase planning notes.
-- `docs/recovery/` — provenance/recovery history notes.
+- `docs/recovery/` — provenance/recovery history notes and archived benchmark/script artifacts.
