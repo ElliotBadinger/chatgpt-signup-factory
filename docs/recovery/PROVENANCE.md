@@ -21,3 +21,11 @@ Removed from active tree:
 
 - `docs/recovery/snapshots/golden-sentinel-json-recovery/` (relocated from repository root `golden-sentinel-json-recovery/`)
 - `docs/recovery/snapshots/session-replay-write-edit-reconstructed/` (relocated from repository root `session-replay-write-edit-reconstructed/`)
+- `docs/recovery/snapshots/17bd43cd01abd2ca4da655d5821c6955621e6d0e-17bd43cd/` (relocated from repository root `17bd43cd01abd2ca4da655d5821c6955621e6d0e-17bd43cd/`)
+- `docs/recovery/snapshots/feat_pipeline-latest-da602c1b/` (relocated from repository root `feat_pipeline-latest-da602c1b/`)
+- `docs/recovery/snapshots/feat_yutori-browsing-account-creation-0d14ce2d/` (relocated from repository root `feat_yutori-browsing-account-creation-0d14ce2d/`)
+- `docs/recovery/snapshots/final-consolidated-browserless-pipeline-recovery/` (relocated from repository root `final-consolidated-browserless-pipeline-recovery/`)
+- `docs/recovery/snapshots/owned-oauth-durability-recovery/` (relocated from repository root `owned-oauth-durability-recovery/`)
+- `docs/recovery/snapshots/sentinel-golden-replay-recovery/` (relocated from repository root `sentinel-golden-replay-recovery/`)
+- `docs/recovery/snapshots/session-replay-from-yutori-plus-april-codexpatch/` (relocated from repository root `session-replay-from-yutori-plus-april-codexpatch/`)
+- `docs/recovery/snapshots/session-replay-from-yutori-plus-april-patches/` (relocated from repository root `session-replay-from-yutori-plus-april-patches/`)
