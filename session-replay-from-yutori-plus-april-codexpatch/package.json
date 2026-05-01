@@ -1,0 +1,17 @@
+{
+  "name": "codex-account-creator",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ChatGPT account creator HTTP service for Ink cloud deployment",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --rootDir=. --config='{\"transform\":{},\"testEnvironment\":\"node\",\"testTimeout\":300000,\"testMatch\":[\"**/tests/**/*.test.js\"]}'"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "puppeteer-core": "^24.36.1"
+  }
+}

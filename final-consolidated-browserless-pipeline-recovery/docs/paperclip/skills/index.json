@@ -1,0 +1,33 @@
+{
+  "requiredSuperpowers": [
+    "using-superpowers",
+    "using-git-worktrees",
+    "subagent-driven-development",
+    "executing-plans",
+    "verification-before-completion",
+    "requesting-code-review",
+    "test-driven-development"
+  ],
+  "wrapperSkills": [
+    {
+      "name": "paperclip-operator-mode",
+      "path": "docs/paperclip/skills/paperclip-operator-mode/SKILL.md"
+    },
+    {
+      "name": "paperclip-wave-execution",
+      "path": "docs/paperclip/skills/paperclip-wave-execution/SKILL.md"
+    },
+    {
+      "name": "paperclip-dynamic-hiring-policy",
+      "path": "docs/paperclip/skills/paperclip-dynamic-hiring-policy/SKILL.md"
+    },
+    {
+      "name": "paperclip-worklog-discipline",
+      "path": "docs/paperclip/skills/paperclip-worklog-discipline/SKILL.md"
+    },
+    {
+      "name": "paperclip-stop-condition-escalation",
+      "path": "docs/paperclip/skills/paperclip-stop-condition-escalation/SKILL.md"
+    }
+  ]
+}

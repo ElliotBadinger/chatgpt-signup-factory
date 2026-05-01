@@ -1,0 +1,4 @@
+ref=feat/pipeline-latest
+commit=da602c1b676c93161b96f28714abe6695cc97746
+date=2026-03-15 18:28:47 +0200
+subject=arch: local Chrome + stealth for account creation; lightpanda for API calls only

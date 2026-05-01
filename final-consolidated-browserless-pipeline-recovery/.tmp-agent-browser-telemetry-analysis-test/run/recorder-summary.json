@@ -1,0 +1,12 @@
+{
+  "eventCounts": {
+    "Network.requestWillBeSent": 7
+  },
+  "jsExceptions": [],
+  "challengeSignals": [
+    {
+      "kind": "cloudflare-response",
+      "url": "https://chatgpt.com/auth/login_with"
+    }
+  ]
+}

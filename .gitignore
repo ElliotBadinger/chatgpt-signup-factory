@@ -1,11 +1,16 @@
-# Dependencies
-/node_modules/
+# Dependencies / build output
+node_modules/
 .worktrees/
+video/
+_verification/
+.DS_Store
 
 # Local environment and credentials
 .env
 .env.*
 !.env.example
+**/.env
+**/.env.*
 *.local
 *.secret
 *.secrets
@@ -21,13 +26,19 @@
 # Scratch and local experimentation
 /scratch/
 
-# Runtime/browser state
+# Runtime/browser state and generated runtime artifacts
 /profiles/
 /browser-profiles/
 /chrome-profile/
 /playwright/.auth/
 /user-data/
 /state/
+_evidence/
+**/_evidence/
+artifacts/auth-traces/
+**/artifacts/auth-traces/
+.omx/
+**/.omx/
 
 # E2E artifacts (snapshots/screenshots)
 /artifacts/
@@ -54,3 +65,7 @@ turnstile_*
 *.log.*
 *.tmp
 *.pid
+
+# Local account/runtime files
+accounts-created.txt
+agentmail_accounts.csv

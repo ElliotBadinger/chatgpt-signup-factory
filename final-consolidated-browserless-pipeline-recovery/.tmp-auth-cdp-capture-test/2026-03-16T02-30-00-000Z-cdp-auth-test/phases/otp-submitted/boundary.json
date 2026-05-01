@@ -1,0 +1,14 @@
+{
+  "phase": "otp-submitted",
+  "capturedAt": "2026-03-16T02:30:00.000Z",
+  "url": "https://auth.openai.com/log-in",
+  "title": "Welcome back - OpenAI",
+  "readyState": "complete",
+  "referrer": "",
+  "cookies": [],
+  "storage": {
+    "localStorage": {},
+    "sessionStorage": {}
+  },
+  "eventCounts": {}
+}
